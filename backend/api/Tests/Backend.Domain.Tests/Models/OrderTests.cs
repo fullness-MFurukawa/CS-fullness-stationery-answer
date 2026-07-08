@@ -43,7 +43,7 @@ public class OrderTests
         Assert.AreEqual(customer, order.Customer);
         Assert.AreEqual(status, order.Status);
         Assert.AreEqual(paymentMethod, order.PaymentMethod);
-        Assert.AreEqual(2, order.Details.Count);
+        Assert.HasCount(2, order.Details);
     }
 
     [TestMethod(DisplayName = "顧客が未指定ならDomainExceptionをスローする")]
