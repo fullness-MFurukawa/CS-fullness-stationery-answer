@@ -2,6 +2,7 @@ using Backend.Domain.Adapters;
 using Backend.Infrastructure.Adapters;
 using EfProduct = Backend.Infrastructure.Entities.Product;
 using DomainProduct = Backend.Domain.Models.Product;
+using Backend.Domain.Exceptions;
 
 namespace Backend.Infrastructure.Factories;
 
@@ -37,6 +38,16 @@ public class ProductFactory : IAggregateFactory<EfProduct, DomainProduct>
     /// <returns>商品集約（ドメイン）</returns>
     public DomainProduct Create(EfProduct source)
     {
+        // 関連が未ロードなら組み立て不可（Includeの指定漏れ）
+        if (source.Category is null)
+        {
+            throw new DomainException("商品カテゴリが読み込まれていません。");
+        }
+        if (source.Stock is null)
+        {
+            throw new DomainException("商品在庫が読み込まれていません。");
+        }
+        
         // 関連（カテゴリ・在庫）を各Adapterで変換
         var category = _categoryAdapter.ToDomain(source.Category);
         var stock = _stockAdapter.ToDomain(source.Stock!);
