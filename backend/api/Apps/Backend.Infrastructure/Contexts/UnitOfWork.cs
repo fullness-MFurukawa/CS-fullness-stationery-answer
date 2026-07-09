@@ -114,4 +114,49 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
         await DisposeTransactionAsync();
         GC.SuppressFinalize(this);
     }
+
+    /// <summary>
+    /// トランザクション内で処理を実行し、成功時はコミット、例外時はロールバックする
+    /// 既にトランザクションが開始されている場合は、その境界に参加する
+    /// </summary>
+    /// <typeparam name="TResult">処理の戻り値の型</typeparam>
+    /// <param name="action">トランザクション内で実行する処理</param>
+    /// <returns>処理の戻り値</returns>
+    public async Task<TResult> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> action)
+    {
+        // 既に外側でトランザクションが開始されている場合は、その境界に参加する
+        // （テストで外側からトランザクションを張るケースを想定）
+        if (_context.Database.CurrentTransaction is not null)
+        {
+            return await action();
+        }
+
+        await BeginTransactionAsync();
+
+        try
+        {
+            var result = await action();
+            await CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// トランザクション内で処理を実行し、成功時はコミット、例外時はロールバックする
+    /// 既にトランザクションが開始されている場合は、その境界に参加する
+    /// </summary>
+    /// <param name="action">トランザクション内で実行する処理</param>
+    public async Task ExecuteInTransactionAsync(Func<Task> action)
+    {
+        await ExecuteInTransactionAsync(async () =>
+        {
+            await action();
+            return true;
+        });
+    }
 }

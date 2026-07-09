@@ -229,9 +229,8 @@ public class AppDbContext : DbContext
             // パスワード(ハッシュ値): 必須・最大255文字
             entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
 
-            // 登録日: 既定値 CURRENT_TIMESTAMP
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-
+            // 登録日: timestamp(タイムゾーンなし)・既定値 CURRENT_TIMESTAMP
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
             // 顧客 1 -- * 注文（削除は制限）
             entity.HasMany(e => e.Orders).WithOne(e => e.Customer).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -243,8 +242,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.OrderUuid).IsRequired().HasDefaultValueSql("gen_random_uuid()");
             entity.HasIndex(e => e.OrderUuid).IsUnique();
 
-            // 注文日: 既定値 CURRENT_TIMESTAMP
-            entity.Property(e => e.OrderDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+             // 注文日: timestamp(タイムゾーンなし)・既定値 CURRENT_TIMESTAMP
+            entity.Property(e => e.OrderDate).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             // 合計金額: 必須
             entity.Property(e => e.AmountTotal).IsRequired();
