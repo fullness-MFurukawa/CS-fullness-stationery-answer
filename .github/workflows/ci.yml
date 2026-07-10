@@ -1,0 +1,63 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: ビルドとテスト
+    runs-on: ubuntu-latest
+
+    # リポジトリ統合テストで使用するPostgreSQL
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fullness_ec
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # appsettings.Test.json の接続文字列を上書きする
+      ConnectionStrings__FullnessEc: "Host=localhost;Port=5432;Database=fullness_ec;Username=postgres;Password=postgres"
+      # 将来 WebApplicationFactory<Program> を使う統合テストで必要になる
+      Jwt__SigningKey: ${{ secrets.JWT_SIGNING_KEY }}
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: .NET SDKをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/api/global.json
+
+      - name: スキーマとサンプルデータを投入
+        # データベースは POSTGRES_DB により作成済みのため 01 は実行しない
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d fullness_ec -v ON_ERROR_STOP=1 -f db/02_create_tables.sql
+          psql -h localhost -U postgres -d fullness_ec -v ON_ERROR_STOP=1 -f db/03_insert_sample_data.sql
+
+      - name: 依存パッケージを復元
+        working-directory: backend/api
+        run: dotnet restore
+
+      - name: ビルド
+        working-directory: backend/api
+        run: dotnet build --configuration Release --no-restore
+
+      - name: テスト
+        working-directory: backend/api
+        run: dotnet test --configuration Release --no-build --verbosity normal
