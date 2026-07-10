@@ -9,17 +9,17 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="AccountName">アカウント名</param>
 /// <param name="Password">平文のパスワード</param>
 public sealed record EmployeeAccountRegisterRequest(
-    [property: Required(ErrorMessage = "社員名を選択してください")]
+    [Required(ErrorMessage = "社員を選択してください")]
     Guid? EmployeeId,
 
-    [property: Required(ErrorMessage = "アカウント名を入力してください")]
-    [property: StringLength(20, MinimumLength = 5, ErrorMessage = "アカウント名は5～20文字で入力してください")]
-    [property: RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage = "アカウント名は半角英数字で入力してください")]
+    [Required(ErrorMessage = "アカウント名を入力してください")]
+    [StringLength(20, MinimumLength = 5, ErrorMessage = "アカウント名は5〜20文字で入力してください")]
+    [RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage = "アカウント名は英数字で入力してください")]
     string AccountName,
 
-    [property: Required(ErrorMessage = "パスワードを入力してください")]
-    [property: StringLength(20, MinimumLength = 5, ErrorMessage = "パスワードは5～20文字で入力してください")]
-    [property: RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage = "パスワードは半角英数字で入力してください")]
+    [Required(ErrorMessage = "パスワードを入力してください")]
+    [StringLength(20, MinimumLength = 5, ErrorMessage = "パスワードは5〜20文字で入力してください")]
+    [RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage = "パスワードは英数字で入力してください")]
     string Password)
 {
     /// <summary>
@@ -27,7 +27,5 @@ public sealed record EmployeeAccountRegisterRequest(
     /// </summary>
     /// <returns>パスワードを含まない文字列表現</returns>
     public override string ToString()
-        => $"{nameof(EmployeeAccountRegisterRequest)} {{ " +
-           $"{nameof(EmployeeId)} = {EmployeeId}, " +
-           $"{nameof(AccountName)} = {AccountName} }}";
+        => $"{nameof(EmployeeAccountRegisterRequest)} {{ {nameof(EmployeeId)} = {EmployeeId}, {nameof(AccountName)} = {AccountName} }}";
 }

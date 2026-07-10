@@ -1,7 +1,9 @@
 using Backend.Api.Adapters;
 using Backend.Api.ViewModels.Requests;
 using Backend.Api.ViewModels.Responses;
+using Backend.Application.Params;
 using Backend.Application.Usecases;
+using Backend.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +25,7 @@ public class ProductsController : ControllerBase
     private readonly ProductRegisterRequestAdapter _productRegisterRequestAdapter;
     private readonly ProductUpdateRequestAdapter _productUpdateRequestAdapter;
     private readonly ProductResponseAdapter _productResponseAdapter;
+    private readonly IImageUploadUsecase _imageUploadUsecase;
 
     /// <summary>
     /// コンストラクタ
@@ -34,6 +37,7 @@ public class ProductsController : ControllerBase
     /// <param name="productRegisterRequestAdapter">新商品登録のリクエストアダプタ</param>
     /// <param name="productUpdateRequestAdapter">商品修正のリクエストアダプタ</param>
     /// <param name="productResponseAdapter">商品のレスポンスアダプタ</param>
+    /// <param name="imageUploadUsecase">画像アップロードのユースケース</param>
     public ProductsController(
         IProductSearchUsecase productSearchUsecase,
         IProductRegisterUsecase productRegisterUsecase,
@@ -41,7 +45,8 @@ public class ProductsController : ControllerBase
         IProductDeleteUsecase productDeleteUsecase,
         ProductRegisterRequestAdapter productRegisterRequestAdapter,
         ProductUpdateRequestAdapter productUpdateRequestAdapter,
-        ProductResponseAdapter productResponseAdapter)
+        ProductResponseAdapter productResponseAdapter,
+        IImageUploadUsecase imageUploadUsecase)
     {
         _productSearchUsecase = productSearchUsecase;
         _productRegisterUsecase = productRegisterUsecase;
@@ -50,6 +55,7 @@ public class ProductsController : ControllerBase
         _productRegisterRequestAdapter = productRegisterRequestAdapter;
         _productUpdateRequestAdapter = productUpdateRequestAdapter;
         _productResponseAdapter = productResponseAdapter;
+        _imageUploadUsecase = imageUploadUsecase;
     }
 
     /// <summary>
@@ -129,5 +135,33 @@ public class ProductsController : ControllerBase
         var response = _productResponseAdapter.ToSource(product);
 
         return Ok(response);
+    }
+
+    /// <summary>
+    /// 商品画像をアップロードする（補助）
+    /// </summary>
+    /// <param name="file">アップロードする画像ファイル</param>
+    /// <returns>保存された画像のURL</returns>
+    /// <remarks>
+    /// 商品登録・商品修正のリクエストに指定する画像URLを取得するためのエンドポイント。
+    /// 対応形式はPNGとJPEG、上限は2MBとする。
+    /// </remarks>
+    [HttpPost("images")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(2 * 1024 * 1024)]
+    [ProducesResponseType(typeof(ImageUploadResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ImageUploadResponse>> UploadImageAsync(IFormFile file)
+    {
+        if (file is null)
+            throw new DomainException("画像が指定されていません。");
+
+        await using var stream = file.OpenReadStream();
+
+        var param = new ImageUploadParam(stream, file.FileName, file.ContentType, file.Length);
+        var imageUrl = await _imageUploadUsecase.ExecuteAsync(param);
+
+        return StatusCode(StatusCodes.Status201Created, new ImageUploadResponse(imageUrl));
     }
 }

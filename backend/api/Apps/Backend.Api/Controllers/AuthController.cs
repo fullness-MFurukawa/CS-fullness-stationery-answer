@@ -19,6 +19,7 @@ public class AuthController : ControllerBase
     private readonly IEmployeeLoginUsecase _employeeLoginUsecase;
     private readonly LoginRequestAdapter _loginRequestAdapter;
     private readonly LoginResponseAdapter _loginResponseAdapter;
+    private readonly AuthCookie _authCookie;
 
     /// <summary>
     /// コンストラクタ
@@ -26,14 +27,17 @@ public class AuthController : ControllerBase
     /// <param name="employeeLoginUsecase">担当者ログインのユースケース</param>
     /// <param name="loginRequestAdapter">ログインのリクエストアダプタ</param>
     /// <param name="loginResponseAdapter">ログインのレスポンスアダプタ</param>
+    /// <param name="authCookie">認証Cookie</param>
     public AuthController(
         IEmployeeLoginUsecase employeeLoginUsecase,
         LoginRequestAdapter loginRequestAdapter,
-        LoginResponseAdapter loginResponseAdapter)
+        LoginResponseAdapter loginResponseAdapter,
+        AuthCookie authCookie)
     {
         _employeeLoginUsecase = employeeLoginUsecase;
         _loginRequestAdapter = loginRequestAdapter;
         _loginResponseAdapter = loginResponseAdapter;
+        _authCookie = authCookie;
     }
 
     /// <summary>
@@ -57,9 +61,9 @@ public class AuthController : ControllerBase
         var result = await _employeeLoginUsecase.ExecuteAsync(param);
 
         Response.Cookies.Append(
-            AuthCookie.Name,
+            _authCookie.Name,
             result.Token.Value,
-            AuthCookie.Create(result.Token.ExpiresAt));
+            _authCookie.Create(result.Token.ExpiresAt));
 
         var response = _loginResponseAdapter.ToSource(result.Account);
 
@@ -81,7 +85,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete(AuthCookie.Name, AuthCookie.CreateForDelete());
+        Response.Cookies.Delete(_authCookie.Name, _authCookie.CreateForDelete());
 
         return NoContent();
     }

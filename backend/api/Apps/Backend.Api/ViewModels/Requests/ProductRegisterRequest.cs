@@ -11,20 +11,20 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="CategoryId">商品カテゴリ識別ID(uuid)</param>
 /// <param name="Quantity">初期在庫数</param>
 public sealed record ProductRegisterRequest(
-    [property: Required(ErrorMessage = "商品名を入力してください")]
-    [property: StringLength(20, MinimumLength = 2, ErrorMessage = "商品名は2～20文字で入力してください")]
+    [Required(ErrorMessage = "商品名を入力してください")]
+    [StringLength(100, ErrorMessage = "商品名は100文字以内で入力してください")]
     string Name,
 
-    [property: Required(ErrorMessage = "価格を入力してください")]
-    [property: Range(0, 1_000_000, ErrorMessage = "価格は1,000,000円以下で入力してください")]
+    [Required(ErrorMessage = "価格を入力してください")]
+    [Range(0, int.MaxValue, ErrorMessage = "価格は0以上で入力してください")]
     int? Price,
 
-    [property: StringLength(200, ErrorMessage = "画像URLは200文字以内で入力してください")]
+    [StringLength(200, ErrorMessage = "画像URLは200文字以内で入力してください")]
     string? ImageUrl,
 
-    [property: Required(ErrorMessage = "カテゴリを選択してください")]
+    [Required(ErrorMessage = "商品カテゴリを選択してください")]
     Guid? CategoryId,
 
-    [property: Required(ErrorMessage = "在庫数を入力してください")]
-    [property: Range(0, 1_000, ErrorMessage = "在庫数は1,000個以下で入力してください")]
+    [Required(ErrorMessage = "在庫数を入力してください")]
+    [Range(0, int.MaxValue, ErrorMessage = "在庫数は0以上で入力してください")]
     int? Quantity);

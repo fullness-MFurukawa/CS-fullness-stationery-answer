@@ -1,4 +1,5 @@
 using Backend.Api.Adapters;
+using Backend.Api.Authentication;
 
 namespace Backend.Api.Extensions;
 
@@ -30,6 +31,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<OrderDetailResponseAdapter>();
         services.AddSingleton<OrderResponseAdapter>();
         services.AddSingleton<OrderStatusResponseAdapter>();
+
+        services.AddSingleton<AuthCookie>();
+
         return services;
     }
 }

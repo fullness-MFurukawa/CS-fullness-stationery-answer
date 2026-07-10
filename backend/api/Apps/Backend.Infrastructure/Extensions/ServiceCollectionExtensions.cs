@@ -5,6 +5,7 @@ using Backend.Infrastructure.Contexts;
 using Backend.Infrastructure.Factories;
 using Backend.Infrastructure.Repositories;
 using Backend.Infrastructure.Security;
+using Backend.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,6 +67,10 @@ public static class ServiceCollectionExtensions
         // JWTの構成をバインドし、トークン生成を登録する（状態を持たないためシングルトン）
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
+
+        // 画像保存の設定をバインドし、ローカルファイルシステムへの画像保存を登録する（状態を持たないためシングルトン）
+        services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
+        services.AddScoped<IImageStorage, LocalImageStorage>();
 
         return services;
     }

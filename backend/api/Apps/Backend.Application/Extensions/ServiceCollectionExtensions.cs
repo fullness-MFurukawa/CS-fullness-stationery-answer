@@ -38,6 +38,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmployeeWithoutAccountSearchUsecase, EmployeeWithoutAccountSearchInteractor>();
         services.AddScoped<IOrderStatusSearchUsecase, OrderStatusSearchInteractor>();
 
+        // 画像アップロード（UC018）
+        services.AddScoped<IImageUploadUsecase, ImageUploadInteractor>();
+
         return services;
     }
 }

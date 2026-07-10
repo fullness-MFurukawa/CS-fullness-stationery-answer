@@ -480,3 +480,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# アップロードされた商品画像はリポジトリに含めない
+Apps/Backend.Api/wwwroot/images/products/*
+!Apps/Backend.Api/wwwroot/images/products/.gitkeep

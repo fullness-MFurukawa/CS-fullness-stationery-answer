@@ -8,10 +8,10 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="AccountName">アカウント名</param>
 /// <param name="Password">平文のパスワード</param>
 public sealed record LoginRequest(
-    [property: Required(ErrorMessage = "アカウント名を入力してください")]
+    [Required(ErrorMessage = "アカウント名を入力してください")]
     string AccountName,
 
-    [property: Required(ErrorMessage = "パスワードを入力してください")]
+    [Required(ErrorMessage = "パスワードを入力してください")]
     string Password)
 {
     /// <summary>
