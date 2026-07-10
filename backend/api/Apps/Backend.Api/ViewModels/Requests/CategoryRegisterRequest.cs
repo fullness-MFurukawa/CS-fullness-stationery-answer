@@ -7,6 +7,6 @@ namespace Backend.Api.ViewModels.Requests;
 /// </summary>
 /// <param name="Name">商品カテゴリ名</param>
 public sealed record CategoryRegisterRequest(
-    [Required(ErrorMessage = "商品カテゴリ名を入力してください")]
-    [StringLength(30, ErrorMessage = "商品カテゴリ名は30文字以内で入力してください")]
+    [Required(ErrorMessage = "カテゴリ名を入力してください")]
+    [StringLength(30, ErrorMessage = "カテゴリ名は30文字以内で入力してください")]
     string Name);

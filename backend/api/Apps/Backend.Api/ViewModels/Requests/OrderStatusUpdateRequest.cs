@@ -9,7 +9,6 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="OrderStatusId">新しい注文ステータスID</param>
 public sealed record OrderStatusUpdateRequest(
     [Required(ErrorMessage = "注文ステータスを選択してください")]
-    [Range(1, int.MaxValue, ErrorMessage = "正しい注文ステータスを選択してください")]
     int? OrderStatusId)
 {
     /// <summary>

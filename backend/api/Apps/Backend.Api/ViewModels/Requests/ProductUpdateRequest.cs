@@ -13,11 +13,11 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="Quantity">在庫数</param>
 public sealed record ProductUpdateRequest(
     [Required(ErrorMessage = "商品名を入力してください")]
-    [StringLength(20, MinimumLength = 2, ErrorMessage = "商品名は2～20文字で入力してください")]
+    [StringLength(100, ErrorMessage = "商品名は100文字以内で入力してください")]
     string Name,
 
     [Required(ErrorMessage = "価格を入力してください")]
-    [Range(0, 1_000_000, ErrorMessage = "価格は1,000,000円以下で入力してください")]
+    [Range(0, int.MaxValue, ErrorMessage = "価格は0以上で入力してください")]
     int? Price,
 
     [StringLength(200, ErrorMessage = "画像URLは200文字以内で入力してください")]
@@ -27,7 +27,7 @@ public sealed record ProductUpdateRequest(
     Guid? CategoryId,
 
     [Required(ErrorMessage = "在庫数を入力してください")]
-    [Range(0, 1_000, ErrorMessage = "在庫数は1,000個以下で入力してください")]
+    [Range(0, int.MaxValue, ErrorMessage = "在庫数は0以上で入力してください")]
     int? Quantity)
 {
     /// <summary>

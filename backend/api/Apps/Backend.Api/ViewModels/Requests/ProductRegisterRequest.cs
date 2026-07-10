@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 namespace Backend.Api.ViewModels.Requests;
 
 /// <summary>
-/// UC010:新商品登録のリクエスト
+/// UC010:商品登録のリクエスト
 /// </summary>
 /// <param name="Name">商品名</param>
 /// <param name="Price">価格</param>
 /// <param name="ImageUrl">画像URL</param>
 /// <param name="CategoryId">商品カテゴリ識別ID(uuid)</param>
-/// <param name="Quantity">初期在庫数</param>
+/// <param name="Quantity">在庫数</param>
 public sealed record ProductRegisterRequest(
     [Required(ErrorMessage = "商品名を入力してください")]
     [StringLength(100, ErrorMessage = "商品名は100文字以内で入力してください")]
@@ -22,7 +22,7 @@ public sealed record ProductRegisterRequest(
     [StringLength(200, ErrorMessage = "画像URLは200文字以内で入力してください")]
     string? ImageUrl,
 
-    [Required(ErrorMessage = "商品カテゴリを選択してください")]
+    [Required(ErrorMessage = "カテゴリを選択してください")]
     Guid? CategoryId,
 
     [Required(ErrorMessage = "在庫数を入力してください")]

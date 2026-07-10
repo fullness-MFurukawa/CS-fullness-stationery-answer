@@ -74,7 +74,7 @@ public sealed class Product : Entity<Guid>
         }
         Name = name;
         Price = price;
-        ImageUrl = imageUrl;
+        ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl;
         Category = category;
         Stock = stock;
         IsDeleted = isDeleted;
