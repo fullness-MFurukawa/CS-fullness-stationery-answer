@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using Backend.Application.Results;
 
 namespace Backend.Application.Interfaces;

@@ -6,6 +6,7 @@ using Backend.Infrastructure.Factories;
 using Backend.Infrastructure.Repositories;
 using Backend.Infrastructure.Security;
 using Backend.Infrastructure.Storage;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,7 @@ public static class ServiceCollectionExtensions
     /// <returns>サービスコレクション</returns>
     /// <exception cref="InvalidOperationException">接続文字列が設定されていない場合</exception>
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,IConfiguration configuration)
+        this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("FullnessEc")
             ?? throw new InvalidOperationException("接続文字列 'FullnessEc' が設定されていません。");

@@ -10,12 +10,12 @@ public class NotFoundException : Exception
     /// コンストラクタ
     /// </summary>
     /// <param name="message">未検出であることを伝えるメッセージ</param>
-    public NotFoundException(string message) : base(message){}
+    public NotFoundException(string message) : base(message) { }
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="message">未検出であることを伝えるメッセージ</param>
     /// <param name="innerException">この例外の原因となった内部例外</param>
-    public NotFoundException(string message, Exception innerException) : base(message, innerException){}
+    public NotFoundException(string message, Exception innerException) : base(message, innerException) { }
 }

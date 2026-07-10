@@ -1,4 +1,5 @@
 using System.Data.Common;
+
 using Backend.Domain.Exceptions;
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
@@ -6,6 +7,7 @@ using Backend.Infrastructure.Adapters;
 using Backend.Infrastructure.Contexts;
 using Backend.Infrastructure.Exceptions;
 using Backend.Infrastructure.Factories;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Repositories;

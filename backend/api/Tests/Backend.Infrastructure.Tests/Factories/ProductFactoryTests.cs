@@ -1,6 +1,7 @@
 using Backend.Domain.Exceptions;
 using Backend.Infrastructure.Adapters;
 using Backend.Infrastructure.Factories;
+
 using EfProduct = Backend.Infrastructure.Entities.Product;
 using EfProductCategory = Backend.Infrastructure.Entities.ProductCategory;
 using EfProductStock = Backend.Infrastructure.Entities.ProductStock;

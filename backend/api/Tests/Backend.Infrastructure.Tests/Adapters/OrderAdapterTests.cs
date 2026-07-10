@@ -1,13 +1,14 @@
 using Backend.Infrastructure.Adapters;
-using EfOrder = Backend.Infrastructure.Entities.Order;
-using DomainOrder = Backend.Domain.Models.Order;
+
 using DomainCustomer = Backend.Domain.Models.Customer;
+using DomainOrder = Backend.Domain.Models.Order;
+using DomainOrderDetail = Backend.Domain.Models.OrderDetail;
 using DomainOrderStatus = Backend.Domain.Models.OrderStatus;
 using DomainPaymentMethod = Backend.Domain.Models.PaymentMethod;
-using DomainOrderDetail = Backend.Domain.Models.OrderDetail;
 using DomainProduct = Backend.Domain.Models.Product;
 using DomainProductCategory = Backend.Domain.Models.ProductCategory;
 using DomainProductStock = Backend.Domain.Models.ProductStock;
+using EfOrder = Backend.Infrastructure.Entities.Order;
 
 namespace Backend.Infrastructure.Tests.Adapters;
 

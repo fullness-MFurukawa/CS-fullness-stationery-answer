@@ -1,9 +1,10 @@
 using Backend.Domain.Adapters;
 using Backend.Domain.Exceptions;
 using Backend.Infrastructure.Adapters;
-using EfOrder = Backend.Infrastructure.Entities.Order;
+
 using DomainOrder = Backend.Domain.Models.Order;
 using DomainOrderDetail = Backend.Domain.Models.OrderDetail;
+using EfOrder = Backend.Infrastructure.Entities.Order;
 
 namespace Backend.Infrastructure.Factories;
 

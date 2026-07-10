@@ -23,7 +23,7 @@ public class EntityTests
         public OtherEntity(Guid id) : base(id) { }
     }
 
-    [TestMethod(DisplayName ="同じ識別子を持つ同一型のエンティティは等価になる")]
+    [TestMethod(DisplayName = "同じ識別子を持つ同一型のエンティティは等価になる")]
     public void Equals_SameTypeAndSameId_ReturnsTrue()
     {
         var id = Guid.NewGuid();

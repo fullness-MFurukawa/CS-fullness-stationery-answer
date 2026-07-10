@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfProductCategory = Backend.Infrastructure.Entities.ProductCategory;
+
 using DomainProductCategory = Backend.Domain.Models.ProductCategory;
+using EfProductCategory = Backend.Infrastructure.Entities.ProductCategory;
 
 namespace Backend.Infrastructure.Adapters;
 

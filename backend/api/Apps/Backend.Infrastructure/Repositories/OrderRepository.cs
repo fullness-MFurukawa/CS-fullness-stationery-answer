@@ -1,10 +1,13 @@
 using System.Data.Common;
+
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
 using Backend.Infrastructure.Contexts;
 using Backend.Infrastructure.Exceptions;
 using Backend.Infrastructure.Factories;
+
 using Microsoft.EntityFrameworkCore;
+
 using EfOrder = Backend.Infrastructure.Entities.Order;
 
 namespace Backend.Infrastructure.Repositories;

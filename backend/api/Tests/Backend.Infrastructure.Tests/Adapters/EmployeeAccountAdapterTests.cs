@@ -1,8 +1,9 @@
 using Backend.Infrastructure.Adapters;
-using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
-using DomainEmployeeAccount = Backend.Domain.Models.EmployeeAccount;
-using DomainEmployee = Backend.Domain.Models.Employee;
+
 using DomainDepartment = Backend.Domain.Models.Department;
+using DomainEmployee = Backend.Domain.Models.Employee;
+using DomainEmployeeAccount = Backend.Domain.Models.EmployeeAccount;
+using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
 
 namespace Backend.Infrastructure.Tests.Adapters;
 

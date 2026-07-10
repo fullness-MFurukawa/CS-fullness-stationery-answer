@@ -4,6 +4,7 @@ using Backend.Api.ViewModels.Responses;
 using Backend.Application.Params;
 using Backend.Application.Usecases;
 using Backend.Domain.Exceptions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

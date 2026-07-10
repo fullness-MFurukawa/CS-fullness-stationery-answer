@@ -1,6 +1,6 @@
-using EfOrderDetail = Backend.Infrastructure.Entities.OrderDetail;
 using DomainOrderDetail = Backend.Domain.Models.OrderDetail;
 using DomainProduct = Backend.Domain.Models.Product;
+using EfOrderDetail = Backend.Infrastructure.Entities.OrderDetail;
 
 namespace Backend.Infrastructure.Adapters;
 

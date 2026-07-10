@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfDepartment = Backend.Infrastructure.Entities.Department;
+
 using DomainDepartment = Backend.Domain.Models.Department;
+using EfDepartment = Backend.Infrastructure.Entities.Department;
 
 namespace Backend.Infrastructure.Adapters;
 

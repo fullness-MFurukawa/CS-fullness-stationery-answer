@@ -1,9 +1,11 @@
 using System.Data.Common;
+
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
 using Backend.Infrastructure.Contexts;
 using Backend.Infrastructure.Exceptions;
 using Backend.Infrastructure.Factories;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Repositories;
@@ -43,11 +45,12 @@ public class EmployeeRepository : IEmployeeRepository
             .ToListAsync();
 
             return entities.Select(_employeeFactory.Create).ToList();
-            
-        }catch(DbException ex)
+
+        }
+        catch (DbException ex)
         {
             throw new InternalException("社員の取得に失敗しました。", ex);
-        }   
+        }
     }
 
     /// <summary>
@@ -65,7 +68,8 @@ public class EmployeeRepository : IEmployeeRepository
             .FirstOrDefaultAsync(e => e.EmployeeUuid == id);
             // 存在しない場合はnullを返す
             return entity is null ? null : _employeeFactory.Create(entity);
-        }catch(DbException ex)
+        }
+        catch (DbException ex)
         {
             throw new InternalException("社員の取得に失敗しました。", ex);
         }

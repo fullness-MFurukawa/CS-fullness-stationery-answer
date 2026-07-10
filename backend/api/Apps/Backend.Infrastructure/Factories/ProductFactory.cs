@@ -1,8 +1,9 @@
 using Backend.Domain.Adapters;
-using Backend.Infrastructure.Adapters;
-using EfProduct = Backend.Infrastructure.Entities.Product;
-using DomainProduct = Backend.Domain.Models.Product;
 using Backend.Domain.Exceptions;
+using Backend.Infrastructure.Adapters;
+
+using DomainProduct = Backend.Domain.Models.Product;
+using EfProduct = Backend.Infrastructure.Entities.Product;
 
 namespace Backend.Infrastructure.Factories;
 
@@ -47,7 +48,7 @@ public class ProductFactory : IAggregateFactory<EfProduct, DomainProduct>
         {
             throw new DomainException("商品在庫が読み込まれていません。");
         }
-        
+
         // 関連（カテゴリ・在庫）を各Adapterで変換
         var category = _categoryAdapter.ToDomain(source.Category);
         var stock = _stockAdapter.ToDomain(source.Stock!);

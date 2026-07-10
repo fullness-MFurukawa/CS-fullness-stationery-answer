@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfPaymentMethod = Backend.Infrastructure.Entities.PaymentMethod;
+
 using DomainPaymentMethod = Backend.Domain.Models.PaymentMethod;
+using EfPaymentMethod = Backend.Infrastructure.Entities.PaymentMethod;
 
 namespace Backend.Infrastructure.Adapters;
 

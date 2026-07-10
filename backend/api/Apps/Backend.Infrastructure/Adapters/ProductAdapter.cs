@@ -1,7 +1,7 @@
-using EfProduct = Backend.Infrastructure.Entities.Product;
 using DomainProduct = Backend.Domain.Models.Product;
 using DomainProductCategory = Backend.Domain.Models.ProductCategory;
 using DomainProductStock = Backend.Domain.Models.ProductStock;
+using EfProduct = Backend.Infrastructure.Entities.Product;
 
 namespace Backend.Infrastructure.Adapters;
 

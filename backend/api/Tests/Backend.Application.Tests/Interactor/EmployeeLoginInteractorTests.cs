@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using Backend.Application.Exceptions;
 using Backend.Application.Interactor;
 using Backend.Application.Interfaces;
@@ -6,6 +7,7 @@ using Backend.Application.Params;
 using Backend.Application.Results;
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
+
 using Moq;
 
 namespace Backend.Application.Tests.Interactor;

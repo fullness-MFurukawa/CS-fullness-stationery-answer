@@ -1,9 +1,10 @@
 using Backend.Infrastructure.Adapters;
-using EfOrderDetail = Backend.Infrastructure.Entities.OrderDetail;
+
 using DomainOrderDetail = Backend.Domain.Models.OrderDetail;
 using DomainProduct = Backend.Domain.Models.Product;
 using DomainProductCategory = Backend.Domain.Models.ProductCategory;
 using DomainProductStock = Backend.Domain.Models.ProductStock;
+using EfOrderDetail = Backend.Infrastructure.Entities.OrderDetail;
 
 namespace Backend.Infrastructure.Tests.Adapters;
 

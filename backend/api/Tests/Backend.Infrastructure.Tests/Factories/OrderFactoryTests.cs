@@ -1,9 +1,10 @@
 using Backend.Domain.Exceptions;
 using Backend.Infrastructure.Adapters;
 using Backend.Infrastructure.Factories;
+
+using EfCustomer = Backend.Infrastructure.Entities.Customer;
 using EfOrder = Backend.Infrastructure.Entities.Order;
 using EfOrderDetail = Backend.Infrastructure.Entities.OrderDetail;
-using EfCustomer = Backend.Infrastructure.Entities.Customer;
 using EfOrderStatus = Backend.Infrastructure.Entities.OrderStatus;
 using EfPaymentMethod = Backend.Infrastructure.Entities.PaymentMethod;
 using EfProduct = Backend.Infrastructure.Entities.Product;

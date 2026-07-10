@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfOrderStatus = Backend.Infrastructure.Entities.OrderStatus;
+
 using DomainOrderStatus = Backend.Domain.Models.OrderStatus;
+using EfOrderStatus = Backend.Infrastructure.Entities.OrderStatus;
 
 namespace Backend.Infrastructure.Adapters;
 

@@ -1,4 +1,5 @@
 using Backend.Infrastructure.Entities;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Contexts;
@@ -12,7 +13,7 @@ public class AppDbContext : DbContext
     /// コンストラクタ
     /// </summary>
     /// <param name="options">DbContextの構成オプション</param>
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){}
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     /// <summary>
     /// 部署
@@ -125,7 +126,7 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Employee).WithOne(e => e.Account).HasForeignKey<EmployeeAccount>(e => e.EmployeeId).OnDelete(DeleteBehavior.Restrict);
         });
 
-         // ---- 商品カテゴリ(product_category) ----
+        // ---- 商品カテゴリ(product_category) ----
         modelBuilder.Entity<ProductCategory>(entity =>
         {
             // 商品カテゴリ識別ID: 必須・一意・既定値 gen_random_uuid()
@@ -242,7 +243,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.OrderUuid).IsRequired().HasDefaultValueSql("gen_random_uuid()");
             entity.HasIndex(e => e.OrderUuid).IsUnique();
 
-             // 注文日: timestamp(タイムゾーンなし)・既定値 CURRENT_TIMESTAMP
+            // 注文日: timestamp(タイムゾーンなし)・既定値 CURRENT_TIMESTAMP
             entity.Property(e => e.OrderDate).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             // 合計金額: 必須
@@ -264,5 +265,5 @@ public class AppDbContext : DbContext
             // 商品 1 -- * 注文明細（削除は制限：明細で使用中の商品は削除不可）
             entity.HasOne(e => e.Product).WithMany(e => e.OrderDetails).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Restrict);
         });
-    }   
+    }
 }

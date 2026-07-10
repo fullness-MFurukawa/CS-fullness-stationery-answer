@@ -1,8 +1,9 @@
 using Backend.Domain.Adapters;
 using Backend.Domain.Exceptions;
 using Backend.Infrastructure.Adapters;
-using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
+
 using DomainEmployeeAccount = Backend.Domain.Models.EmployeeAccount;
+using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
 
 namespace Backend.Infrastructure.Factories;
 

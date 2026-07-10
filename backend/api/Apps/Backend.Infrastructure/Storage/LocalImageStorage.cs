@@ -1,5 +1,6 @@
 using Backend.Application.Interfaces;
 using Backend.Infrastructure.Exceptions;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 

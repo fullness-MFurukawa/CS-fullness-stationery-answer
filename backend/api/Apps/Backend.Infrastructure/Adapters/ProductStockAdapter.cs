@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfProductStock = Backend.Infrastructure.Entities.ProductStock;
+
 using DomainProductStock = Backend.Domain.Models.ProductStock;
+using EfProductStock = Backend.Infrastructure.Entities.ProductStock;
 
 namespace Backend.Infrastructure.Adapters;
 

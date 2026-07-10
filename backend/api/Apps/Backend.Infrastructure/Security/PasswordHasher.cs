@@ -1,5 +1,7 @@
 using Backend.Application.Interfaces;
+
 using Microsoft.AspNetCore.Identity;
+
 using IdentityPasswordHasher = Microsoft.AspNetCore.Identity.PasswordHasher<object>;
 
 namespace Backend.Infrastructure.Security;

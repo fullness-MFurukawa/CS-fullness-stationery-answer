@@ -21,5 +21,5 @@ public class DomainException : Exception
     /// <param name="message">業務エラーの内容</param>
     /// <param name="innerException">この例外の原因となった内部例外</param>
     public DomainException(string message, Exception innerException)
-        : base(message, innerException){}
+        : base(message, innerException) { }
 }

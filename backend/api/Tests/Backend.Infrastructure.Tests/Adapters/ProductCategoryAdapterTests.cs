@@ -1,6 +1,7 @@
 using Backend.Infrastructure.Adapters;
-using EfProductCategory = Backend.Infrastructure.Entities.ProductCategory;
+
 using DomainProductCategory = Backend.Domain.Models.ProductCategory;
+using EfProductCategory = Backend.Infrastructure.Entities.ProductCategory;
 
 namespace Backend.Infrastructure.Tests.Adapters;
 

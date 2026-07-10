@@ -1,6 +1,6 @@
-using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
-using DomainEmployeeAccount = Backend.Domain.Models.EmployeeAccount;
 using DomainEmployee = Backend.Domain.Models.Employee;
+using DomainEmployeeAccount = Backend.Domain.Models.EmployeeAccount;
+using EfEmployeeAccount = Backend.Infrastructure.Entities.EmployeeAccount;
 
 namespace Backend.Infrastructure.Adapters;
 

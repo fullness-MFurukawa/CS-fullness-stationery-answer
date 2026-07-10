@@ -1,6 +1,8 @@
 using System.Data.Common;
+
 using Backend.Application.Interfaces;
 using Backend.Infrastructure.Exceptions;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 

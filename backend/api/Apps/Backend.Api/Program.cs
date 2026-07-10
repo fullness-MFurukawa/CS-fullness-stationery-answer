@@ -1,9 +1,11 @@
 using System.Text;
+
 using Backend.Api.Authentication;
 using Backend.Api.Extensions;
 using Backend.Api.Middleware;
 using Backend.Application.Extensions;
 using Backend.Infrastructure.Extensions;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
@@ -61,7 +63,7 @@ builder.Services
             }
         };
     });
-    
+
 builder.Services.AddAuthorization();
 
 // ------------------------------------------------------------

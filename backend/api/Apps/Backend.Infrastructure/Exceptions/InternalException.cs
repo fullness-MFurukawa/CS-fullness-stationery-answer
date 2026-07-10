@@ -11,7 +11,7 @@ public class InternalException : Exception
     /// </summary>
     /// <param name="message">エラーの内容</param>
     public InternalException(string message)
-        : base(message){}
+        : base(message) { }
 
     /// <summary>
     /// コンストラクタ
@@ -19,5 +19,5 @@ public class InternalException : Exception
     /// <param name="message">エラーの内容</param>
     /// <param name="innerException">この例外の原因となった内部例外</param>
     public InternalException(string message, Exception innerException)
-        : base(message, innerException) {}
+        : base(message, innerException) { }
 }

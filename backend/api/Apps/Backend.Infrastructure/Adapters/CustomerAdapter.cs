@@ -1,6 +1,7 @@
 using Backend.Domain.Adapters;
-using EfCustomer = Backend.Infrastructure.Entities.Customer;
+
 using DomainCustomer = Backend.Domain.Models.Customer;
+using EfCustomer = Backend.Infrastructure.Entities.Customer;
 
 namespace Backend.Infrastructure.Adapters;
 

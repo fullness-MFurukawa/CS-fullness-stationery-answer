@@ -17,7 +17,7 @@ public sealed class Department : Entity<Guid>
     /// <param name="id">部署識別ID(uuid)</param>
     /// <param name="name">部署名</param>
     /// <exception cref="DomainException">部署名が未指定の場合</exception>
-    public Department(Guid id, string name): base(id)
+    public Department(Guid id, string name) : base(id)
     {
         if (string.IsNullOrWhiteSpace(name))
         {

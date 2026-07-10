@@ -1,10 +1,12 @@
 
 using System.Data.Common;
+
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
 using Backend.Infrastructure.Adapters;
 using Backend.Infrastructure.Contexts;
 using Backend.Infrastructure.Exceptions;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Repositories;
@@ -42,7 +44,7 @@ public class ProductCategoryRepository : IProductCategoryRepository
             .ToListAsync();
             return entities.Select(_adapter.ToDomain).ToList();
         }
-        catch(DbException ex)
+        catch (DbException ex)
         {
             throw new InternalException("商品カテゴリの取得に失敗しました。", ex);
         }
@@ -63,7 +65,7 @@ public class ProductCategoryRepository : IProductCategoryRepository
             // 存在しない場合はnullを返す
             return entity is null ? null : _adapter.ToDomain(entity);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new InternalException("商品カテゴリの取得に失敗しました。", ex);
         }
@@ -80,9 +82,9 @@ public class ProductCategoryRepository : IProductCategoryRepository
             var entity = _adapter.ToSource(category);
 
             _context.ProductCategories.Add(entity);
-            await _context.SaveChangesAsync();   
+            await _context.SaveChangesAsync();
         }
-        catch(DbException ex)
+        catch (DbException ex)
         {
             throw new InternalException("商品カテゴリの登録に失敗しました。", ex);
         }

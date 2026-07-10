@@ -1,6 +1,6 @@
-using EfEmployee = Backend.Infrastructure.Entities.Employee;
-using DomainEmployee = Backend.Domain.Models.Employee;
 using DomainDepartment = Backend.Domain.Models.Department;
+using DomainEmployee = Backend.Domain.Models.Employee;
+using EfEmployee = Backend.Infrastructure.Entities.Employee;
 namespace Backend.Infrastructure.Adapters;
 /// <summary>
 /// 社員(Employee)とEFエンティティ(EmployeeEntity)を相互変換するアダプタ

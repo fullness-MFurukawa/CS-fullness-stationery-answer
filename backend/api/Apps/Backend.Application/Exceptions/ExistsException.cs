@@ -10,12 +10,12 @@ public class ExistsException : Exception
     /// コンストラクタ
     /// </summary>
     /// <param name="message">重複していることを伝えるメッセージ</param>
-    public ExistsException(string message) : base(message) {}
+    public ExistsException(string message) : base(message) { }
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="message">重複していることを伝えるメッセージ</param>
     /// <param name="innerException">この例外の原因となった内部例外</param>
-    public ExistsException(string message, Exception innerException) : base(message, innerException) {}
+    public ExistsException(string message, Exception innerException) : base(message, innerException) { }
 }
