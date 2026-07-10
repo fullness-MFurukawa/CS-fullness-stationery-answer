@@ -17,7 +17,12 @@ public sealed class Product : Entity<Guid>
 
     /// <summary>
     /// 画像URL
+    /// 画像が未設定の場合はnull
     /// </summary>
+    /// <remarks>
+    /// 空文字とnullが混在すると「画像なし」の表現が2通りになるため、
+    /// 空文字および空白のみの文字列はnullへ正規化する。
+    /// </remarks>
     public string? ImageUrl { get; }
 
     /// <summary>

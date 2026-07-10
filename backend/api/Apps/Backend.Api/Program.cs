@@ -88,6 +88,7 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddApiBehavior();
 builder.Services.AddProblemDetails();
 builder.Services.AddSwagger();
 
