@@ -58,6 +58,18 @@ jobs:
         working-directory: backend/api
         run: dotnet build --configuration Release --no-restore
 
-      - name: テスト
+      - name: テスト（ドメイン層）
         working-directory: backend/api
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test Tests/Backend.Domain.Tests/Backend.Domain.Tests.csproj --configuration Release --no-build
+
+      - name: テスト（アプリケーション層）
+        working-directory: backend/api
+        run: dotnet test Tests/Backend.Application.Tests/Backend.Application.Tests.csproj --configuration Release --no-build
+
+      - name: テスト（インフラストラクチャ層）
+        working-directory: backend/api
+        run: dotnet test Tests/Backend.Infrastructure.Tests/Backend.Infrastructure.Tests.csproj --configuration Release --no-build
+
+      - name: テスト（API層）
+        working-directory: backend/api
+        run: dotnet test Tests/Backend.Api.Tests/Backend.Api.Tests.csproj --configuration Release --no-build
