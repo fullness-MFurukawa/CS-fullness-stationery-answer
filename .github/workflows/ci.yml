@@ -54,9 +54,13 @@ jobs:
         working-directory: backend/api
         run: dotnet restore
 
-      - name: ビルド
+      - name: ビルド（警告をエラーとして扱う）
         working-directory: backend/api
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore -warnaserror
+
+      - name: 書式チェック
+        working-directory: backend/api
+        run: dotnet format --verify-no-changes --severity warn --no-restore    
 
       - name: テスト（ドメイン層）
         working-directory: backend/api
