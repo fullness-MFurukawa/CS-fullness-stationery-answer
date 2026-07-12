@@ -55,11 +55,13 @@ public static class SwaggerExtensions
     /// <param name="app">アプリケーションビルダー</param>
     /// <returns>アプリケーションビルダー</returns>
     /// <remarks>
-    /// 開発環境でのみ有効にする。
+    /// 本演習では模範解答として動作確認できるよう有効化を許可する
     /// </remarks>
-    public static WebApplication UseSwaggerUi(this WebApplication app)
+        public static WebApplication UseSwaggerUi(this WebApplication app)
     {
-        if (!app.Environment.IsDevelopment()) return app;
+        var enabledInConfig = app.Configuration.GetValue<bool>("Swagger:Enabled");
+
+        if (!app.Environment.IsDevelopment() && !enabledInConfig) return app;
 
         app.UseSwagger();
         app.UseSwaggerUI(options =>
