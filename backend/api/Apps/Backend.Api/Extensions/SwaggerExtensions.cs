@@ -57,7 +57,7 @@ public static class SwaggerExtensions
     /// <remarks>
     /// 本演習では模範解答として動作確認できるよう有効化を許可する
     /// </remarks>
-        public static WebApplication UseSwaggerUi(this WebApplication app)
+    public static WebApplication UseSwaggerUi(this WebApplication app)
     {
         var enabledInConfig = app.Configuration.GetValue<bool>("Swagger:Enabled");
 
