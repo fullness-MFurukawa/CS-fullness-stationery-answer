@@ -28,7 +28,8 @@
       "_appName": "Fullness Stationery データ管理サービス",
       "_appTitle": "Fullness Stationery API リファレンス",
       "_enableSearch": true,
-      "_lang": "ja"
+      "_lang": "ja",
+      "_disableContribution": true
     }
   }
 }
