@@ -1,5 +1,6 @@
 using Backend.Application.Interfaces;
 using Backend.Application.Usecases;
+using Backend.Domain.Exceptions;
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
 
@@ -8,7 +9,7 @@ namespace Backend.Application.Interactor;
 /// <summary>
 /// UC014:商品カテゴリ登録のユースケース実装
 /// </summary>
-public class CategoryRegisterInteractor : ICategoryRegisterUsecase
+public class  : ICategoryRegisterUsecase
 {
     private readonly IProductCategoryRepository _productCategoryRepository;
     private readonly IUnitOfWork _unitOfWork;
