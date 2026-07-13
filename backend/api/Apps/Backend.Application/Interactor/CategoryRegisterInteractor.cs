@@ -9,7 +9,7 @@ namespace Backend.Application.Interactor;
 /// <summary>
 /// UC014:商品カテゴリ登録のユースケース実装
 /// </summary>
-public class  : ICategoryRegisterUsecase
+public class CategoryRegisterInteractor : ICategoryRegisterUsecase
 {
     private readonly IProductCategoryRepository _productCategoryRepository;
     private readonly IUnitOfWork _unitOfWork;
