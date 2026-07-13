@@ -8,6 +8,8 @@
         }
       ],
       "dest": "api",
+      "namespaceLayout": "nested",
+      "memberLayout": "separatePages",
       "properties": {
         "TargetFramework": "net10.0"
       }
