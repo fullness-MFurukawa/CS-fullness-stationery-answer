@@ -3,7 +3,6 @@ using Backend.Domain.Exceptions;
 using Backend.Infrastructure.Exceptions;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Backend.Api.Middleware;
 

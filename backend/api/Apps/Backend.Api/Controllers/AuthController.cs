@@ -15,6 +15,7 @@ namespace Backend.Api.Controllers;
 [ApiController]
 [Route("api/admin/auth")]
 [Produces("application/json")]
+[Tags("担当者認証")]
 public class AuthController : ControllerBase
 {
     private readonly IEmployeeLoginUsecase _employeeLoginUsecase;

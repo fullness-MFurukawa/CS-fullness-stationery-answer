@@ -15,6 +15,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/employee-accounts")]
 [Produces("application/json")]
+[Tags("従業員アカウント")]
 public class EmployeeAccountsController : ControllerBase
 {
     private readonly IEmployeeAccountRegisterUsecase _employeeAccountRegisterUsecase;

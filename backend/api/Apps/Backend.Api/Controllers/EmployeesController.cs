@@ -14,6 +14,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/employees")]
 [Produces("application/json")]
+[Tags("従業員")]
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeWithoutAccountSearchUsecase _employeeWithoutAccountSearchUsecase;

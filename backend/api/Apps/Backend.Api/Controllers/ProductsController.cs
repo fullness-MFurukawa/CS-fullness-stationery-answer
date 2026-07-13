@@ -15,6 +15,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/products")]
 [Produces("application/json")]
+[Tags("商品")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductSearchUsecase _productSearchUsecase;

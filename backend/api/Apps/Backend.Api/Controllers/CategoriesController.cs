@@ -15,6 +15,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/categories")]
 [Produces("application/json")]
+[Tags("商品カテゴリ")]
 public class CategoriesController : ControllerBase
 {
     private readonly ICategorySearchUsecase _categorySearchUsecase;

@@ -14,6 +14,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/order-statuses")]
 [Produces("application/json")]
+[Tags("注文ステータス")]
 public class OrderStatusesController : ControllerBase
 {
     private readonly IOrderStatusSearchUsecase _orderStatusSearchUsecase;

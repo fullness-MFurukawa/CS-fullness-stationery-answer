@@ -16,6 +16,7 @@ namespace Backend.Api.Controllers;
 [Authorize]
 [Route("api/admin/orders")]
 [Produces("application/json")]
+[Tags("注文")]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderHistorySearchUsecase _orderHistorySearchUsecase;
