@@ -1,0 +1,56 @@
+name: Docs
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# GitHub Pages への公開に必要な権限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時実行を1つに制限（公開の競合を防ぐ）
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ドキュメントを生成
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: .NET SDKをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/api/global.json
+
+      - name: DocFXをインストール
+        run: dotnet tool install -g docfx
+
+      - name: ドキュメントを生成
+        working-directory: backend/api
+        run: |
+          docfx metadata docfx.json
+          docfx build docfx.json
+
+      - name: 生成物をアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: backend/api/_site
+
+  deploy:
+    name: GitHub Pagesへ公開
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 公開する
+        id: deployment
+        uses: actions/deploy-pages@v4

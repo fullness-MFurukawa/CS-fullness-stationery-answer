@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <!-- 全プロジェクトでXMLドキュメントコメントを出力する（DocFXのAPIリファレンス生成に使用） -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- publicメンバへのコメント欠落警告を抑止する -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+</Project>

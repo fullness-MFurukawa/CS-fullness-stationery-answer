@@ -484,3 +484,7 @@ $RECYCLE.BIN/
 # アップロードされた商品画像はリポジトリに含めない
 Apps/Backend.Api/wwwroot/images/products/*
 !Apps/Backend.Api/wwwroot/images/products/.gitkeep
+
+# DocFX の生成物（ソースから再生成できるためコミットしない）
+backend/api/_site/
+backend/api/api/
