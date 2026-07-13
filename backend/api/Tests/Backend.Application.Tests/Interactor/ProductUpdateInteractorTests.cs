@@ -1,7 +1,9 @@
 using Backend.Application.Exceptions;
 using Backend.Application.Interactor;
+using Backend.Application.Interfaces;
 using Backend.Application.Params;
 using Backend.Application.Tests.Fakes;
+using Backend.Application.Usecases;
 using Backend.Domain.Exceptions;
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
@@ -16,6 +18,8 @@ public class ProductUpdateInteractorTests
 {
     private Mock<IProductRepository> _productRepository = null!;
     private Mock<IProductCategoryRepository> _productCategoryRepository = null!;
+    private Mock<IImageUploadUsecase> _imageUploadUsecase = null!;
+    private Mock<IImageStorage> _imageStorage = null!;
     private ProductUpdateInteractor _interactor = null!;
 
     private ProductCategory _oldCategory = null!;
@@ -35,7 +39,7 @@ public class ProductUpdateInteractorTests
             Guid.NewGuid(),
             "水性ボールペン(黒)",
             120,
-            null,
+            "https://example.com/old.png",
             _oldCategory,
             new ProductStock(Guid.NewGuid(), 10));
 
@@ -52,21 +56,50 @@ public class ProductUpdateInteractorTests
             .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_newCategory);
 
+        _imageUploadUsecase = new Mock<IImageUploadUsecase>();
+        _imageUploadUsecase
+            .Setup(u => u.ExecuteAsync(It.IsAny<ImageUploadParam>()))
+            .ReturnsAsync("https://example.com/new.png");
+
+        _imageStorage = new Mock<IImageStorage>();
+        _imageStorage
+            .Setup(s => s.DeleteAsync(It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
         _interactor = new ProductUpdateInteractor(
             _productRepository.Object,
             _productCategoryRepository.Object,
+            _imageUploadUsecase.Object,
+            _imageStorage.Object,
             new PassThroughUnitOfWork());
     }
 
     /// <summary>
-    /// テスト用の入力値を生成する
+    /// テスト用の入力値を生成する（画像なし＝既存維持）
     /// </summary>
     private ProductUpdateParam CreateParam(
         string name = "水性ボールペン(黒) 改",
         int price = 150,
-        string? imageUrl = "https://example.com/pen.png",
         int quantity = 55)
-        => new(_existing.Id, name, price, imageUrl, _newCategory.Id, quantity);
+        => new(_existing.Id, name, price, _newCategory.Id, quantity);
+
+    /// <summary>
+    /// テスト用の入力値を生成する（画像あり＝差し替え）
+    /// </summary>
+    private ProductUpdateParam CreateParamWithImage(
+        string name = "水性ボールペン(黒) 改",
+        int price = 150,
+        int quantity = 55)
+        => new(
+            _existing.Id,
+            name,
+            price,
+            _newCategory.Id,
+            quantity,
+            new MemoryStream([0x89, 0x50, 0x4E, 0x47]),
+            "pen.png",
+            "image/png",
+            4);
 
     [TestMethod(DisplayName = "商品情報と在庫数を更新し更新内容を返す")]
     public async Task ExecuteAsync_ValidParam_UpdatesAndReturnsProduct()
@@ -75,11 +108,36 @@ public class ProductUpdateInteractorTests
 
         Assert.AreEqual("水性ボールペン(黒) 改", product.Name);
         Assert.AreEqual(150, product.Price);
-        Assert.AreEqual("https://example.com/pen.png", product.ImageUrl);
         Assert.AreEqual(_newCategory, product.Category);
         Assert.AreEqual(55, product.Stock.Quantity);
 
         _productRepository.Verify(r => r.UpdateAsync(It.IsAny<Product>()), Times.Once);
+    }
+
+    [TestMethod(DisplayName = "画像を指定しない場合は既存の画像URLを維持する")]
+    public async Task ExecuteAsync_NoImage_KeepsExistingImageUrl()
+    {
+        var product = await _interactor.ExecuteAsync(CreateParam());
+
+        Assert.AreEqual("https://example.com/old.png", product.ImageUrl);
+        _imageUploadUsecase.Verify(u => u.ExecuteAsync(It.IsAny<ImageUploadParam>()), Times.Never);
+        _imageStorage.Verify(s => s.DeleteAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [TestMethod(DisplayName = "画像を指定した場合は新しい画像URLへ差し替える")]
+    public async Task ExecuteAsync_WithImage_ReplacesImageUrl()
+    {
+        var product = await _interactor.ExecuteAsync(CreateParamWithImage());
+
+        Assert.AreEqual("https://example.com/new.png", product.ImageUrl);
+    }
+
+    [TestMethod(DisplayName = "画像を差し替えた場合は更新後に古い画像を削除する")]
+    public async Task ExecuteAsync_WithImage_DeletesOldImage()
+    {
+        await _interactor.ExecuteAsync(CreateParamWithImage());
+
+        _imageStorage.Verify(s => s.DeleteAsync("https://example.com/old.png"), Times.Once);
     }
 
     [TestMethod(DisplayName = "商品と在庫の識別IDは更新後も維持される")]

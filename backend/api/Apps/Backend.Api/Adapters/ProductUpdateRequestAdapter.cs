@@ -20,14 +20,25 @@ public class ProductUpdateRequestAdapter : IEntityAdapter<ProductUpdateRequest, 
     /// </summary>
     /// <param name="source">商品修正のリクエスト（ProductIdはコントローラが設定済み）</param>
     /// <returns>商品修正の入力値</returns>
+    /// <remarks>
+    /// 画像ファイルが指定された場合は、ストリームとメタ情報を入力値へ引き渡す。
+    /// 未指定の場合は既存の画像を維持する。
+    /// </remarks>
     public ProductUpdateParam ToDomain(ProductUpdateRequest source)
-        => new(
+    {
+        var image = source.Image;
+
+        return new ProductUpdateParam(
             source.ProductId,
             source.Name,
             source.Price!.Value,
-            source.ImageUrl,
             source.CategoryId!.Value,
-            source.Quantity!.Value);
+            source.Quantity!.Value,
+            image?.OpenReadStream(),
+            image?.FileName,
+            image?.ContentType,
+            image?.Length ?? 0);
+    }
 
     /// <summary>
     /// ユースケースの入力値からリクエストへ変換する（未サポート）

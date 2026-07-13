@@ -28,6 +28,11 @@ public class LocalImageStorage : IImageStorage
         _absoluteRootPath = Path.Combine(environment.ContentRootPath, _options.RootPath);
     }
 
+    public Task DeleteAsync(string imageUrl)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// 画像を保存し、公開URLを返す
     /// </summary>

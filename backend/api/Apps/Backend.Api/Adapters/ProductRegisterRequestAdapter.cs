@@ -22,14 +22,22 @@ public class ProductRegisterRequestAdapter : IEntityAdapter<ProductRegisterReque
     /// <returns>新商品登録の入力値</returns>
     /// <remarks>
     /// 必須項目はモデル検証を通過している前提のため、nullable の値を確定して取り出す。
+    /// 画像ファイルが指定された場合は、ストリームとメタ情報を入力値へ引き渡す。
     /// </remarks>
     public ProductRegisterParam ToDomain(ProductRegisterRequest source)
-        => new(
+    {
+        var image = source.Image;
+
+        return new ProductRegisterParam(
             source.Name,
             source.Price!.Value,
-            source.ImageUrl,
             source.CategoryId!.Value,
-            source.Quantity!.Value);
+            source.Quantity!.Value,
+            image?.OpenReadStream(),
+            image?.FileName,
+            image?.ContentType,
+            image?.Length ?? 0);
+    }
 
     /// <summary>
     /// ユースケースの入力値からリクエストへ変換する（未サポート）

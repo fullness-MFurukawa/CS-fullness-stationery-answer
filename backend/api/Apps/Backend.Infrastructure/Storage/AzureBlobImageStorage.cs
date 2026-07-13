@@ -88,4 +88,39 @@ public class AzureBlobImageStorage : IImageStorage
             _ => "application/octet-stream"
         };
     }
+
+
+    /// <summary>
+    /// 画像を削除する
+    /// </summary>
+    /// <param name="imageUrl">削除対象の画像の公開URL（SaveAsyncが返した値）</param>
+    /// <returns>削除の完了を表すタスク</returns>
+    /// <remarks>
+    /// 商品保存に失敗した際、保存済みの画像を取り消すために使用する
+    /// 対象が存在しない場合も例外とせず正常終了とする
+    /// </remarks>
+    public async Task DeleteAsync(string imageUrl)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(imageUrl);
+
+        try
+        {
+            var containerClient = new BlobContainerClient(_options.ConnectionString, _options.ContainerName);
+
+            // 公開URLのパスからBlob名（例: products/xxxx.png）を取り出す
+            var uri = new Uri(imageUrl);
+            var blobName = uri.AbsolutePath
+                .TrimStart('/')
+                .Substring(_options.ContainerName.Length + 1);
+
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            // 対象が存在しない場合も例外とせず正常終了とする
+            await blobClient.DeleteIfExistsAsync();
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("画像の削除に失敗しました。", ex);
+        }
+    }
 }

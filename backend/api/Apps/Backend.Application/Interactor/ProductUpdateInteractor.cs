@@ -15,6 +15,8 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
 {
     private readonly IProductRepository _productRepository;
     private readonly IProductCategoryRepository _productCategoryRepository;
+    private readonly IImageUploadUsecase _imageUploadUsecase;
+    private readonly IImageStorage _imageStorage;
     private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
@@ -22,14 +24,20 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
     /// </summary>
     /// <param name="productRepository">商品のリポジトリ</param>
     /// <param name="productCategoryRepository">商品カテゴリのリポジトリ</param>
+    /// <param name="imageUploadUsecase">商品画像アップロードのユースケース</param>
+    /// <param name="imageStorage">画像の保存先（差し替え・取り消しに使用）</param>
     /// <param name="unitOfWork">トランザクション境界の制御</param>
     public ProductUpdateInteractor(
         IProductRepository productRepository,
         IProductCategoryRepository productCategoryRepository,
+        IImageUploadUsecase imageUploadUsecase,
+        IImageStorage imageStorage,
         IUnitOfWork unitOfWork)
     {
         _productRepository = productRepository;
         _productCategoryRepository = productCategoryRepository;
+        _imageUploadUsecase = imageUploadUsecase;
+        _imageStorage = imageStorage;
         _unitOfWork = unitOfWork;
     }
 
@@ -39,40 +47,85 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
     /// <param name="param">商品修正の入力値</param>
     /// <returns>修正された商品</returns>
     /// <exception cref="NotFoundException">対象の商品または商品カテゴリが存在しない場合</exception>
-    /// <exception cref="DomainException">商品名・価格・在庫数が不正な場合</exception>
+    /// <exception cref="DomainException">商品名・価格・在庫数・画像が不正な場合</exception>
     public async Task<Product> ExecuteAsync(ProductUpdateParam param)
     {
-        // トランザクション境界を制御して商品情報を修正する
-        return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        // 新しい画像があれば先に保存し、公開URLを得る（トランザクションの外で行う）
+        string? newImageUrl = null;
+        if (param.ImageContent is not null)
         {
-            // 修正対象の商品を取得する
-            var current = await _productRepository.FindByIdAsync(param.ProductId)
-                ?? throw new NotFoundException("指定された商品は存在しません。");
+            newImageUrl = await _imageUploadUsecase.ExecuteAsync(
+                new ImageUploadParam(param.ImageContent, param.ImageFileName!, param.ImageContentType!, param.ImageLength));
+        }
 
-            // 論理削除済みの商品は修正できない（削除済みという内部状態は漏らさない）
-            if (current.IsDeleted)
+        // 差し替え成功後に削除する、更新前の古い画像URL
+        string? oldImageUrl = null;
+
+        try
+        {
+            var product = await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                throw new NotFoundException("指定された商品は存在しません。");
+                // 修正対象の商品を取得する
+                var current = await _productRepository.FindByIdAsync(param.ProductId)
+                    ?? throw new NotFoundException("指定された商品は存在しません。");
+
+                // 論理削除済みの商品は修正できない（削除済みという内部状態は漏らさない）
+                if (current.IsDeleted)
+                {
+                    throw new NotFoundException("指定された商品は存在しません。");
+                }
+
+                // 変更後の商品カテゴリを取得する
+                var category = await _productCategoryRepository.FindByIdAsync(param.CategoryId)
+                    ?? throw new NotFoundException("指定された商品カテゴリが存在しません。");
+
+                // 画像を新しく指定した場合は差し替える。指定がなければ既存の画像URLを維持する
+                var imageUrl = current.ImageUrl;
+                if (newImageUrl is not null)
+                {
+                    oldImageUrl = current.ImageUrl;   // 更新成功後に削除する
+                    imageUrl = newImageUrl;
+                }
+
+                // 識別子は維持したまま、新しい値で商品集約を再構築する
+                var stock = new ProductStock(current.Stock.Id, param.Quantity);
+                var updated = new Product(
+                    current.Id,
+                    param.Name,
+                    param.Price,
+                    imageUrl,
+                    category,
+                    stock,
+                    current.IsDeleted);
+
+                await _productRepository.UpdateAsync(updated);
+                return updated;
+            });
+
+            // 更新が確定した後に、差し替え前の古い画像を削除する（孤児を残さない）
+            if (oldImageUrl is not null)
+            {
+                try
+                {
+                    await _imageStorage.DeleteAsync(oldImageUrl);
+                }
+                catch
+                {
+                    // 古い画像の削除に失敗しても、更新自体は成功しているため握りつぶす
+                    // 残った画像は孤児として後で掃除する想定
+                }
             }
 
-            // 変更後の商品カテゴリを取得する
-            var category = await _productCategoryRepository.FindByIdAsync(param.CategoryId)
-                ?? throw new NotFoundException("指定された商品カテゴリが存在しません。");
-
-            // 識別子は維持したまま、新しい値で商品集約を再構築する
-            var stock = new ProductStock(current.Stock.Id, param.Quantity);
-            var product = new Product(
-                current.Id,
-                param.Name,
-                param.Price,
-                param.ImageUrl,
-                category,
-                stock,
-                current.IsDeleted);
-
-            await _productRepository.UpdateAsync(product);
-
             return product;
-        });
+        }
+        catch
+        {
+            // 更新に失敗した場合、新しく保存した画像を取り消す（古い画像はそのまま残す）
+            if (newImageUrl is not null)
+            {
+                await _imageStorage.DeleteAsync(newImageUrl);
+            }
+            throw;
+        }
     }
 }

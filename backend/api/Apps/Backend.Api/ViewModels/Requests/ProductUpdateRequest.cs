@@ -8,9 +8,12 @@ namespace Backend.Api.ViewModels.Requests;
 /// </summary>
 /// <param name="Name">商品名</param>
 /// <param name="Price">価格</param>
-/// <param name="ImageUrl">画像URL</param>
 /// <param name="CategoryId">商品カテゴリ識別ID(uuid)</param>
 /// <param name="Quantity">在庫数</param>
+/// <param name="Image">差し替える商品画像ファイル。未指定の場合は既存の画像を維持する</param>
+/// <remarks>
+/// 画像ファイルを含むため multipart/form-data で受け取る。
+/// </remarks>
 public sealed record ProductUpdateRequest(
     [Required(ErrorMessage = "商品名を入力してください")]
     [StringLength(100, ErrorMessage = "商品名は100文字以内で入力してください")]
@@ -20,15 +23,14 @@ public sealed record ProductUpdateRequest(
     [Range(0, int.MaxValue, ErrorMessage = "価格は0以上で入力してください")]
     int? Price,
 
-    [StringLength(200, ErrorMessage = "画像URLは200文字以内で入力してください")]
-    string? ImageUrl,
-
     [Required(ErrorMessage = "カテゴリを選択してください")]
     Guid? CategoryId,
 
     [Required(ErrorMessage = "在庫数を入力してください")]
     [Range(0, int.MaxValue, ErrorMessage = "在庫数は0以上で入力してください")]
-    int? Quantity)
+    int? Quantity,
+
+    IFormFile? Image)
 {
     /// <summary>
     /// 修正対象の商品識別ID(uuid)

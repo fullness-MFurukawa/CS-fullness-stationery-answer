@@ -1,7 +1,9 @@
 using Backend.Application.Exceptions;
 using Backend.Application.Interactor;
+using Backend.Application.Interfaces;
 using Backend.Application.Params;
 using Backend.Application.Tests.Fakes;
+using Backend.Application.Usecases;
 using Backend.Domain.Exceptions;
 using Backend.Domain.Models;
 using Backend.Domain.Repositories;
@@ -16,6 +18,8 @@ public class ProductRegisterInteractorTests
 {
     private Mock<IProductRepository> _productRepository = null!;
     private Mock<IProductCategoryRepository> _productCategoryRepository = null!;
+    private Mock<IImageUploadUsecase> _imageUploadUsecase = null!;
+    private Mock<IImageStorage> _imageStorage = null!;
     private ProductRegisterInteractor _interactor = null!;
 
     private ProductCategory _category = null!;
@@ -38,26 +42,51 @@ public class ProductRegisterInteractorTests
             .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(_category);
 
+        _imageUploadUsecase = new Mock<IImageUploadUsecase>();
+        _imageUploadUsecase
+            .Setup(u => u.ExecuteAsync(It.IsAny<ImageUploadParam>()))
+            .ReturnsAsync("https://example.com/pen.png");
+
+        _imageStorage = new Mock<IImageStorage>();
+
         _interactor = new ProductRegisterInteractor(
             _productRepository.Object,
             _productCategoryRepository.Object,
+            _imageUploadUsecase.Object,
+            _imageStorage.Object,
             new PassThroughUnitOfWork());
     }
 
     /// <summary>
-    /// テスト用の入力値を生成する
+    /// テスト用の入力値を生成する（画像なし）
     /// </summary>
     private ProductRegisterParam CreateParam(
         string name = "水性ボールペン(黒)",
         int price = 120,
-        string? imageUrl = null,
         int quantity = 10)
-        => new(name, price, imageUrl, _category.Id, quantity);
+        => new(name, price, _category.Id, quantity);
+
+    /// <summary>
+    /// テスト用の入力値を生成する（画像あり）
+    /// </summary>
+    private ProductRegisterParam CreateParamWithImage(
+        string name = "水性ボールペン(黒)",
+        int price = 120,
+        int quantity = 10)
+        => new(
+            name,
+            price,
+            _category.Id,
+            quantity,
+            new MemoryStream([0x89, 0x50, 0x4E, 0x47]),
+            "pen.png",
+            "image/png",
+            4);
 
     [TestMethod(DisplayName = "商品を登録し登録内容を返す")]
     public async Task ExecuteAsync_ValidParam_RegistersAndReturnsProduct()
     {
-        var product = await _interactor.ExecuteAsync(CreateParam(imageUrl: "https://example.com/pen.png"));
+        var product = await _interactor.ExecuteAsync(CreateParamWithImage());
 
         Assert.AreEqual("水性ボールペン(黒)", product.Name);
         Assert.AreEqual(120, product.Price);
@@ -67,6 +96,15 @@ public class ProductRegisterInteractorTests
         Assert.IsFalse(product.IsDeleted);
 
         _productRepository.Verify(r => r.AddAsync(It.IsAny<Product>()), Times.Once);
+    }
+
+    [TestMethod(DisplayName = "画像を指定しない場合は画像URLがnullで登録される")]
+    public async Task ExecuteAsync_NoImage_RegistersWithNullImageUrl()
+    {
+        var product = await _interactor.ExecuteAsync(CreateParam());
+
+        Assert.IsNull(product.ImageUrl);
+        _imageUploadUsecase.Verify(u => u.ExecuteAsync(It.IsAny<ImageUploadParam>()), Times.Never);
     }
 
     [TestMethod(DisplayName = "商品と在庫の識別IDはユースケースで採番される")]
