@@ -1,0 +1,41 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * 1'   # 毎週月曜 03:00 UTC に定期実行
+
+jobs:
+  analyze:
+    name: CodeQL解析
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # 解析結果をSecurityタブへアップロードするためのŌ権限
+      contents: read
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: .NET SDKをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/api/global.json
+
+      - name: CodeQLを初期化
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          build-mode: manual
+
+      - name: ビルド
+        working-directory: backend/api
+        run: dotnet build --configuration Release
+
+      - name: 解析を実行
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
