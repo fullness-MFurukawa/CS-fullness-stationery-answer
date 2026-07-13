@@ -22,6 +22,9 @@
       },
       {
         "files": [ "index.md", "toc.yml" ]
+      },
+      {
+        "files": [ "docs/**.md" ]
       }
     ],
     "output": "_site",
