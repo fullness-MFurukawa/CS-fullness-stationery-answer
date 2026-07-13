@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Extensions;
-
 /// <summary>
 /// モデル検証エラーのレスポンスに関する拡張メソッド
 /// </summary>
