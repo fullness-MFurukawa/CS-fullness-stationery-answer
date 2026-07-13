@@ -50,6 +50,7 @@ jobs:
           Jwt__Audience=http://${{ secrets.VM_HOST }}
           ImageStorage__PublicBaseUrl=http://${{ secrets.VM_HOST }}
           AuthCookie__Secure=false
+          Swagger__Enabled=true
           Cors__AllowedOrigins__0=http://${{ secrets.VM_HOST }}
           EOF
           sudo chown root:fullness /etc/fullness/api.env
