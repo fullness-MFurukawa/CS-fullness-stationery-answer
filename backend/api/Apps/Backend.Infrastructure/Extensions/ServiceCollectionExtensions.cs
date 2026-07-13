@@ -70,8 +70,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
 
         // 画像保存の設定をバインドし、ローカルファイルシステムへの画像保存を登録する（状態を持たないためシングルトン）
-        services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
-        services.AddScoped<IImageStorage, LocalImageStorage>();
+        // services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
+        // services.AddScoped<IImageStorage, LocalImageStorage>();
+
+        // AzureのBlob Strategyに画像を保存する
+        services.Configure<AzureBlobStorageOptions>(configuration.GetSection(AzureBlobStorageOptions.SectionName));
+        services.AddScoped<IImageStorage, AzureBlobImageStorage>();
+
 
         return services;
     }
