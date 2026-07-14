@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
+/**
+ * API Proxyの設定
+ * ブラウザからは同一オリジン(/api/admin/...)へアクセスさせ、
+ * Next.jsサーバーが裏でAzureのバックエンドへ転送する。
+ * これによりCORSとCookieのSameSite制約を回避する。
+ */
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: "/api/admin/:path*",
+        destination: `${process.env.API_BASE_URL}/api/admin/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

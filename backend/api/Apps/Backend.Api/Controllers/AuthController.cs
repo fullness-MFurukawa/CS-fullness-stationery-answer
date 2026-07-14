@@ -67,7 +67,7 @@ public class AuthController : ControllerBase
             result.Token.Value,
             _authCookie.Create(result.Token.ExpiresAt));
 
-        var response = _loginResponseAdapter.ToSource(result.Account);
+        var response = _loginResponseAdapter.ToSource(result);
 
         return Ok(response);
     }

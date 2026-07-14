@@ -90,14 +90,23 @@ public class AuthControllerTests
         Assert.Contains("httponly", setCookie.ToLowerInvariant());
     }
 
-    [TestMethod(DisplayName = "ログインレスポンスにトークンに相当するプロパティが存在しない")]
-    public void LoginResponse_HasNoTokenProperty()
+    [TestMethod(DisplayName = "ログイン成功時はレスポンスにアクセストークンを含める")]
+    public async Task LoginAsync_Success_ReturnsAccessToken()
     {
-        var hasTokenProperty = typeof(LoginResponse)
-            .GetProperties()
-            .Any(p => p.Name.Contains("Token", StringComparison.OrdinalIgnoreCase));
+        var token = new AccessToken("dummy.jwt.token", DateTimeOffset.UtcNow.AddMinutes(30));
+        _employeeLoginUsecase
+            .Setup(u => u.ExecuteAsync(It.IsAny<Backend.Application.Params.EmployeeLoginParam>()))
+            .ReturnsAsync(new EmployeeLoginResult(_account, token));
 
-        Assert.IsFalse(hasTokenProperty);
+        var request = new LoginRequest("fullness", "Password123");
+        var result = await _controller.LoginAsync(request);
+
+        var ok = result.Result as OkObjectResult;
+        Assert.IsNotNull(ok);
+
+        var response = ok!.Value as LoginResponse;
+        Assert.IsNotNull(response);
+        Assert.AreEqual("dummy.jwt.token", response!.AccessToken);
     }
 
     [TestMethod(DisplayName = "ログアウトは204を返し認証Cookieを失効させる")]
