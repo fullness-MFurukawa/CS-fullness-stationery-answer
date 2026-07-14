@@ -1,10 +1,6 @@
 - name: ホーム
   href: index.md
 - name: 開発ガイド
-  items:
-    - name: バックエンド CI
-      href: docs/backend-ci.md
-    - name: バックエンド CD
-      href: docs/backend-cd.md
+  href: docs/index.md
 - name: APIリファレンス
   href: api/
