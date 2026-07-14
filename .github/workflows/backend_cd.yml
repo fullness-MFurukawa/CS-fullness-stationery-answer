@@ -60,13 +60,17 @@ jobs:
       - name: 成果物を転送
         run: rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" ${{ github.workspace }}/publish/ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/fullness-publish/
 
-      - name: 配置してサービスを起動
+      - name: 成果物を配置
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "\
             sudo rsync -a --delete --exclude 'wwwroot/images/products/' /tmp/fullness-publish/ ${{ env.DEPLOY_DIR }}/ && \
             sudo mkdir -p ${{ env.DEPLOY_DIR }}/wwwroot/images/products && \
             sudo chown -R fullness:fullness ${{ env.DEPLOY_DIR }} && \
-            sudo chmod +x ${{ env.DEPLOY_DIR }}/Backend.Api && \
-            sudo systemctl start ${{ env.SERVICE_NAME }} && \
+            sudo chmod +x ${{ env.DEPLOY_DIR }}/Backend.Api"
+
+      - name: サービスを再起動
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "\
+            sudo systemctl restart ${{ env.SERVICE_NAME }} && \
             sleep 8 && \
             sudo systemctl is-active ${{ env.SERVICE_NAME }}"
