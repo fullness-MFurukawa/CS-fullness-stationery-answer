@@ -1,20 +1,12 @@
 import { auth } from "@/auth";
+import { Dashboard } from "@/components/admin/dashboard/dashboard";
 
 /**
- * BP001 メニュー画面
+ * BP001 メニュー画面（ダッシュボード）
  * URL: /admin
  */
 export default async function AdminPage() {
   const session = await auth();
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">メニュー</h1>
-        <p className="text-muted-foreground mt-1">
-          ようこそ、{session?.user?.name}さん
-        </p>
-      </div>
-    </div>
-  );
+  return <Dashboard employeeName={session?.user?.name ?? ""} />;
 }

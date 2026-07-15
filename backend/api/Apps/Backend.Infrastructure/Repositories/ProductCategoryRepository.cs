@@ -89,4 +89,21 @@ public class ProductCategoryRepository : IProductCategoryRepository
             throw new InternalException("商品カテゴリの登録に失敗しました。", ex);
         }
     }
+
+    /// <summary>
+    /// 商品カテゴリの件数を取得
+    /// </summary>
+    /// <returns>商品カテゴリの件数</returns>
+    /// <exception cref="InternalException">データベースアクセスに失敗した場合</exception>
+    public async Task<int> CountAsync()
+    {
+        try
+        {
+            return await _context.ProductCategories.CountAsync();
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("商品カテゴリの件数取得に失敗しました。", ex);
+        }
+    }
 }

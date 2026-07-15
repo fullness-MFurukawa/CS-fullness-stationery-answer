@@ -31,7 +31,6 @@ import {
  * 画面設計(BP001)の処理仕様に対応する。
  */
 const menuItems = [
-  { title: "メニュー", url: "/admin", icon: LayoutDashboard },
   { title: "商品検索", url: "/admin/products", icon: Search },
   { title: "新商品登録", url: "/admin/products/new", icon: PackagePlus },
   { title: "商品カテゴリ登録", url: "/admin/categories/new", icon: FolderPlus },
@@ -49,7 +48,7 @@ export function AdminSidebar({ employeeName }: { employeeName: string }) {
   return (
     <Sidebar>
       <SidebarHeader className="border-b">
-        <div className="flex items-center gap-2 px-2 py-3">
+        <Link href="/admin" className="flex items-center gap-2 px-2 py-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <PenTool className="size-5" />
           </div>
@@ -57,7 +56,7 @@ export function AdminSidebar({ employeeName }: { employeeName: string }) {
             <span className="text-sm font-semibold">Fullness Stationery</span>
             <span className="text-xs text-muted-foreground">データ管理サービス</span>
           </div>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>

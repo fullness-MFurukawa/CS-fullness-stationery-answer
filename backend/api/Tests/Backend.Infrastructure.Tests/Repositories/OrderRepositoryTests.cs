@@ -184,4 +184,53 @@ public class OrderRepositoryTests : RepositoryTestBase
         Assert.AreEqual(2, updated.Status.Id);
         Assert.AreEqual("入金済", updated.Status.Name);
     }
+
+    [TestMethod(DisplayName = "注文の件数を取得できる")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task CountAsync_ReturnsOrderCount()
+    {
+        var repository = CreateRepository();
+   
+        var count = await repository.CountAsync();
+
+        Assert.AreEqual(4, count);
+    }
+
+    [TestMethod(DisplayName = "すべての注文の合計金額を集計できる")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task SumAmountTotalAsync_ReturnsTotalSales()
+    {
+        var repository = CreateRepository();
+   
+        var total = await repository.SumAmountTotalAsync();
+
+        // 340 + 100 + 120 + 3800
+        Assert.AreEqual(4360, total);
+    }
+
+    [TestMethod(DisplayName = "注文ステータスごとの件数を集計できる")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task CountByStatusAsync_ReturnsCountsByStatus()
+    {
+        var repository = CreateRepository();
+   
+        var counts = await repository.CountByStatusAsync();
+
+        // 注文済:1件、配送中:1件、完了:2件
+        Assert.AreEqual(1, counts[1]);
+        Assert.AreEqual(1, counts[3]);
+        Assert.AreEqual(2, counts[4]);
+    }
+
+    [TestMethod(DisplayName = "該当する注文が無いステータスは集計結果に含まれない")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task CountByStatusAsync_StatusWithoutOrders_IsNotIncluded()
+    {
+        var repository = CreateRepository();
+   
+        var counts = await repository.CountByStatusAsync();
+
+        // 入金済(ID:2)の注文は存在しない
+        Assert.IsFalse(counts.ContainsKey(2));
+    }
 }

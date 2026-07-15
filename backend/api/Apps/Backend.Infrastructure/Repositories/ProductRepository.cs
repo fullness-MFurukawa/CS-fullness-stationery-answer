@@ -238,4 +238,23 @@ public class ProductRepository : IProductRepository
             throw new InternalException("商品情報の取得に失敗しました。", ex);
         }
     }
+
+    /// <summary>
+    /// 有効な商品の件数を取得(論理削除を除く)
+    /// </summary>
+    /// <returns>有効な商品の件数</returns>
+    /// <exception cref="InternalException">データベースアクセスに失敗した場合</exception>
+    public async Task<int> CountAsync()
+    {
+        try
+        {
+            return await _context.Products
+                .Where(p => p.DeleteFlg == 0)
+                .CountAsync();
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("商品の件数取得に失敗しました。", ex);
+        }
+    }
 }

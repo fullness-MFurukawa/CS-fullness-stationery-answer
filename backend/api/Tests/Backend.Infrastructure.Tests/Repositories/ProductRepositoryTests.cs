@@ -174,4 +174,16 @@ public class ProductRepositoryTests : RepositoryTestBase
         Assert.IsTrue(saved.IsDeleted);
         Assert.AreEqual(target.Name, saved.Name);
     }
+
+    [TestMethod(DisplayName = "有効な商品の件数を取得できる")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task CountAsync_ReturnsActiveProductCount()
+    {
+        var repository = CreateRepository();
+        
+        var count = await repository.CountAsync();
+
+        // サンプルデータは14件のうち1件が論理削除済み
+        Assert.AreEqual(13, count);
+    }
 }

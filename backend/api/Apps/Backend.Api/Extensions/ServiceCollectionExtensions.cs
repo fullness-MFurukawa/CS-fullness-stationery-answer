@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<OrderStatusResponseAdapter>();
 
         services.AddSingleton<AuthCookie>();
+        services.AddSingleton<DashboardSummaryResponseAdapter>();
 
         return services;
     }

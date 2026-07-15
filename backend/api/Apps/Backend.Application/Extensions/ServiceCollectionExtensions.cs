@@ -42,6 +42,10 @@ public static class ServiceCollectionExtensions
         // 画像アップロード（UC018）
         services.AddScoped<IImageUploadUsecase, ImageUploadInteractor>();
 
+        // 統計情報の取得
+        services.AddScoped<IDashboardSummaryUsecase, DashboardSummaryInteractor>();
+        
+
         return services;
     }
 }

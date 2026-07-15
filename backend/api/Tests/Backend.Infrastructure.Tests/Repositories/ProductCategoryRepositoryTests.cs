@@ -75,4 +75,15 @@ public class ProductCategoryRepositoryTests : RepositoryTestBase
         var after = await repository.FindAllAsync();
         Assert.HasCount(before.Count + 1, after);
     }
+
+    [TestMethod(DisplayName = "商品カテゴリの件数を取得できる")]
+    [TestCategory("Backend.Infrastructure.Repositories")]
+    public async Task CountAsync_ReturnsCategoryCount()
+    {
+        var repository = CreateRepository();
+       
+        var count = await repository.CountAsync();
+
+        Assert.AreEqual(3, count);
+    }
 }

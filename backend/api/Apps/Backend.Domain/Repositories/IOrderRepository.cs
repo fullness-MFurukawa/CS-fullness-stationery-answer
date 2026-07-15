@@ -34,4 +34,22 @@ public interface IOrderRepository
     /// <param name="orderId">注文識別ID(uuid)</param>
     /// <param name="status">新しい注文ステータス</param>
     Task UpdateStatusAsync(Guid orderId, OrderStatus status);
+
+    /// <summary>
+    /// 注文の件数を取得
+    /// </summary>
+    /// <returns>注文の件数</returns>
+    Task<int> CountAsync();
+
+    /// <summary>
+    /// すべての注文の合計金額を集計
+    /// </summary>
+    /// <returns>合計金額の総和</returns>
+    Task<int> SumAmountTotalAsync();
+
+    /// <summary>
+    /// 注文ステータスごとの注文件数を集計
+    /// </summary>
+    /// <returns>注文ステータスIDをキー、件数を値とする辞書</returns>
+    Task<IReadOnlyDictionary<int, int>> CountByStatusAsync();
 }

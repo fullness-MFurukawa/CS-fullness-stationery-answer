@@ -24,4 +24,10 @@ public interface IProductCategoryRepository
     /// </summary>
     /// <param name="category">登録する商品カテゴリ</param>
     Task AddAsync(ProductCategory category);
+
+    /// <summary>
+    /// 商品カテゴリの件数を取得
+    /// </summary>
+    /// <returns>商品カテゴリの件数</returns>
+    Task<int> CountAsync();
 }

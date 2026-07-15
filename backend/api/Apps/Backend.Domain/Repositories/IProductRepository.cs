@@ -44,4 +44,10 @@ public interface IProductRepository
     /// </summary>
     /// <param name="id">削除対象の商品識別ID(uuid)</param>
     Task DeleteByIdAsync(Guid id);
+
+    /// <summary>
+    /// 有効な商品の件数を取得(論理削除を除く)
+    /// </summary>
+    /// <returns>有効な商品の件数</returns>
+    Task<int> CountAsync();
 }

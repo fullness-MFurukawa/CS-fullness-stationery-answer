@@ -162,4 +162,62 @@ public class OrderRepository : IOrderRepository
             throw new InternalException("注文情報の取得に失敗しました。", ex);
         }
     }
+
+    /// <summary>
+    /// 注文の件数を取得
+    /// </summary>
+    /// <returns>注文の件数</returns>
+    /// <exception cref="InternalException">データベースアクセスに失敗した場合</exception>
+    public async Task<int> CountAsync()
+    {
+        try
+        {
+            return await _context.Orders.CountAsync();
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("注文の件数取得に失敗しました。", ex);
+        }
+    }
+
+    /// <summary>
+    /// すべての注文の合計金額を集計
+    /// </summary>
+    /// <returns>合計金額の総和</returns>
+    /// <exception cref="InternalException">データベースアクセスに失敗した場合</exception>
+    public async Task<int> SumAmountTotalAsync()
+    {
+        try
+        {
+            // 注文が存在しない場合、SumAsyncは0を返す
+            return await _context.Orders.SumAsync(o => o.AmountTotal);
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("注文の売上集計に失敗しました。", ex);
+        }
+    }
+
+    /// <summary>
+    /// 注文ステータスごとの注文件数を集計
+    /// </summary>
+    /// <returns>注文ステータスIDをキー、件数を値とする辞書</returns>
+    /// <exception cref="InternalException">データベースアクセスに失敗した場合</exception>
+    public async Task<IReadOnlyDictionary<int, int>> CountByStatusAsync()
+    {
+        try
+        {
+            // ステータスIDでグループ化し、件数を集計する
+            var counts = await _context.Orders
+                .GroupBy(o => o.OrderStatusId)
+                .Select(g => new { StatusId = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return counts.ToDictionary(c => c.StatusId, c => c.Count);
+        }
+        catch (Exception ex) when (ex is not InternalException)
+        {
+            throw new InternalException("注文ステータス別の件数集計に失敗しました。", ex);
+        }
+    }
 }
