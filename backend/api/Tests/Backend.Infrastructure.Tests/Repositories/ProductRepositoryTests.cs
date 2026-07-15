@@ -180,7 +180,7 @@ public class ProductRepositoryTests : RepositoryTestBase
     public async Task CountAsync_ReturnsActiveProductCount()
     {
         var repository = CreateRepository();
-        
+
         var count = await repository.CountAsync();
 
         // サンプルデータは14件のうち1件が論理削除済み

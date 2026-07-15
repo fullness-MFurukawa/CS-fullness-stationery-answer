@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
 
         // 統計情報の取得
         services.AddScoped<IDashboardSummaryUsecase, DashboardSummaryInteractor>();
-        
+
 
         return services;
     }

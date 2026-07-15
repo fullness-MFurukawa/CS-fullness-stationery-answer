@@ -190,7 +190,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     public async Task CountAsync_ReturnsOrderCount()
     {
         var repository = CreateRepository();
-   
+
         var count = await repository.CountAsync();
 
         Assert.AreEqual(4, count);
@@ -201,7 +201,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     public async Task SumAmountTotalAsync_ReturnsTotalSales()
     {
         var repository = CreateRepository();
-   
+
         var total = await repository.SumAmountTotalAsync();
 
         // 340 + 100 + 120 + 3800
@@ -213,7 +213,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     public async Task CountByStatusAsync_ReturnsCountsByStatus()
     {
         var repository = CreateRepository();
-   
+
         var counts = await repository.CountByStatusAsync();
 
         // 注文済:1件、配送中:1件、完了:2件
@@ -227,7 +227,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     public async Task CountByStatusAsync_StatusWithoutOrders_IsNotIncluded()
     {
         var repository = CreateRepository();
-   
+
         var counts = await repository.CountByStatusAsync();
 
         // 入金済(ID:2)の注文は存在しない

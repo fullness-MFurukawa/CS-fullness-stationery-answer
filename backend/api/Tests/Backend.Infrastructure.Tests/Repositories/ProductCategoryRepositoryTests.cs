@@ -81,7 +81,7 @@ public class ProductCategoryRepositoryTests : RepositoryTestBase
     public async Task CountAsync_ReturnsCategoryCount()
     {
         var repository = CreateRepository();
-       
+
         var count = await repository.CountAsync();
 
         Assert.AreEqual(3, count);
