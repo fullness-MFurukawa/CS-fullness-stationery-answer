@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "blob20260713.blob.core.windows.net",
+        pathname: "/images/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

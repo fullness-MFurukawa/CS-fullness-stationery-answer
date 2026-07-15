@@ -4,4 +4,5 @@
 export interface LoginResult {
     accountName: string;    // アカウント名
     employeeName: string;   // 社員名
+    accessToken: string;    // アクセストークン
 }

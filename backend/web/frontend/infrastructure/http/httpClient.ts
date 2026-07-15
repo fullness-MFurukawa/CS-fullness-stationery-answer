@@ -1,25 +1,50 @@
 import { ApiError } from "./apiError";
 
 /**
+ * アクセストークンを取得する関数の型
+ * 未ログインなどでトークンが無い場合は undefined を返す。
+ */
+export type TokenProvider = () => Promise<string | undefined>;
+
+/**
  * バックエンドAPIとの通信を担う共通クライアント
- * ベースURLの付与、認証Cookieの送信、エラーのApiErrorへの変換を一元的に行う。
+ * ベースURLの付与、認証トークンの付与、エラーのApiErrorへの変換を一元的に行う。
  */
 export class HttpClient {
     /**
-     * @param baseUrl APIのベースURL（例: http://localhost:5266）
+     * @param baseUrl APIのベースURL。Proxy経由で相対パスを使う場合は空文字
+     * @param tokenProvider アクセストークンを取得する関数。省略時は認証ヘッダを付与しない
      */
-    constructor(private readonly baseUrl: string) {}
+    constructor(
+        private readonly baseUrl: string = "",
+        private readonly tokenProvider?: TokenProvider,
+    ) {}
+
+    /**
+     * 認証ヘッダを組み立てる
+     * @returns トークンが取得できた場合は Authorization ヘッダ、それ以外は空のオブジェクト
+     */
+    private async authHeader(): Promise<Record<string, string>> {
+        if (!this.tokenProvider) {
+            return {};
+        }
+        const token = await this.tokenProvider();
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    }
 
     /**
      * GET リクエストを送信し、JSONを取得する
-     * @param path ベースURLからのパス（例: /api/admin/categories）
+     * @param path ベースURLからのパス
      * @returns レスポンスのJSONを型 T として返す
      */
     async get<T>(path: string): Promise<T> {
         const response = await fetch(this.baseUrl + path, {
             method: "GET",
             credentials: "include",
-            headers: { Accept: "application/json" },
+            headers: {
+                Accept: "application/json",
+                ...(await this.authHeader()),
+            },
         });
         return this.handleResponse<T>(response);
     }
@@ -36,8 +61,9 @@ export class HttpClient {
             method,
             credentials: "include",
             headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                ...(await this.authHeader()),
             },
             body: JSON.stringify(body),
         });
@@ -56,11 +82,14 @@ export class HttpClient {
         const response = await fetch(this.baseUrl + path, {
             method,
             credentials: "include",
-            headers: { Accept: "application/json" },
+            headers: {
+                Accept: "application/json",
+                    ...(await this.authHeader()),
+            },
             body: formData,
         });
         return this.handleResponse<T>(response);
-  }
+    }
 
     /**
      * ボディを返さない POST / DELETE リクエストを送信する（例: ログアウト）
@@ -71,7 +100,10 @@ export class HttpClient {
         const response = await fetch(this.baseUrl + path, {
             method,
             credentials: "include",
-            headers: { Accept: "application/json" },
+            headers: {
+                Accept: "application/json",
+                ...(await this.authHeader()),
+            },
         });
         await this.handleResponse<void>(response);
     }
@@ -85,7 +117,10 @@ export class HttpClient {
         const response = await fetch(this.baseUrl + path, {
             method: "DELETE",
             credentials: "include",
-            headers: { Accept: "application/json" },
+            headers: {
+                Accept: "application/json",
+                ...(await this.authHeader()),
+            },
         });
         return this.handleResponse<T>(response);
     }
@@ -97,7 +132,6 @@ export class HttpClient {
      */
     private async handleResponse<T>(response: Response): Promise<T> {
         if (response.ok) {
-            // 204 No Content や空ボディに対応する
             if (response.status === 204) {
                 return undefined as T;
             }
@@ -105,7 +139,6 @@ export class HttpClient {
             return (text ? JSON.parse(text) : undefined) as T;
         }
 
-        // エラー時は ProblemDetails を読み取って ApiError に変換する
         let title = "エラーが発生しました";
         let detail: string | undefined;
         try {

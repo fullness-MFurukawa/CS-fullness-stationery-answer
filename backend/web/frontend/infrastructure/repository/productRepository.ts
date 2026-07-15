@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import type { IProductRepository } from "@/interfaces/repositpry/productRepository";
+import type { IProductRepository } from "@/interfaces/repository/productRepository";
 import type { Product } from "@/models/responses/product";
 import type { ProductRegisterRequest } from "@/models/requests/productRegisterRequest";
 import type { ProductUpdateRequest } from "@/models/requests/productUpdateRequest";

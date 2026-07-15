@@ -1,34 +1,34 @@
 import { injectable, inject } from "inversify";
+import type { ICategoryService } from "@/interfaces/service/categoryService";
 import type { ICategoryRepository } from "@/interfaces/repository/categoryRepository";
 import type { Category } from "@/models/responses/category";
 import type { CategoryRegisterRequest } from "@/models/requests/categoryRegisterRequest";
-import { HttpClient } from "@/infrastructure/http/httpClient";
 import { TYPES } from "@/di/types";
 
 /**
- * 商品カテゴリに関するAPI呼び出しの実装
- * バックエンドの /api/admin/categories エンドポイント群を呼び出す。
+ * 商品カテゴリ管理に関するユースケースの実装
+ * UC014（商品カテゴリ登録）に対応する。
  */
 @injectable()
-export class CategoryRepository implements ICategoryRepository {
+export class CategoryService implements ICategoryService {
     /**
-     * @param httpClient API通信の共通クライアント
+     * @param categoryRepository 商品カテゴリのリポジトリ
      */
     constructor(
-        @inject(TYPES.HttpClient) private readonly httpClient: HttpClient,
+        @inject(TYPES.CategoryRepository) private readonly categoryRepository: ICategoryRepository,
     ) {}
 
     /**
      * 商品カテゴリの一覧を取得する
      */
     async search(): Promise<Category[]> {
-        return this.httpClient.get<Category[]>("/api/admin/categories");
+        return this.categoryRepository.search();
     }
 
     /**
      * 商品カテゴリを登録する（UC014）
      */
     async register(request: CategoryRegisterRequest): Promise<Category> {
-        return this.httpClient.sendJson<Category>("POST", "/api/admin/categories", request);
+        return this.categoryRepository.register(request);
     }
 }
