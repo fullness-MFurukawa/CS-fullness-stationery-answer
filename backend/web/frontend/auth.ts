@@ -56,6 +56,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
 
+    session: {
+        strategy: "jwt",
+        // バックエンドのアクセストークンの有効期限（30分）に合わせる
+        maxAge: 30 * 60,
+    },
+
     callbacks: {
         /**
          * JWTコールバック
