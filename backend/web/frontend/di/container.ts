@@ -25,6 +25,10 @@ import { ProductService } from "@/service/productService";
 import { CategoryService } from "@/service/categoryService";
 import { OrderService } from "@/service/orderService";
 import { EmployeeAccountService } from "@/service/employeeAccountService"
+import { IDashboardRepository } from "@/interfaces/repository/dashboardRepository";
+import { DashboardRepository } from "@/infrastructure/repository/dashboardRepository";
+import { IDashboardService } from "@/interfaces/service/dashboardService";
+import { DashboardService } from "@/service/dashboardService";
 
 /**
  * DIコンテナ
@@ -60,5 +64,9 @@ container.bind<IProductService>(TYPES.ProductService).to(ProductService);
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryService);
 container.bind<IOrderService>(TYPES.OrderService).to(OrderService);
 container.bind<IEmployeeAccountService>(TYPES.EmployeeAccountService).to(EmployeeAccountService);
+
+container.bind<IDashboardRepository>(TYPES.DashboardRepository).to(DashboardRepository);
+container.bind<IDashboardService>(TYPES.DashboardService).to(DashboardService);
+
 
 export { container };

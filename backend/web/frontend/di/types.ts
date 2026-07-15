@@ -17,4 +17,7 @@ export const TYPES = {
     CategoryService: Symbol.for("CategoryService"),
     OrderService: Symbol.for("OrderService"),
     EmployeeAccountService: Symbol.for("EmployeeAccountService"),
+
+    DashboardRepository: Symbol.for("DashboardRepository"),
+    DashboardService: Symbol.for("DashboardService"),
 } as const;
