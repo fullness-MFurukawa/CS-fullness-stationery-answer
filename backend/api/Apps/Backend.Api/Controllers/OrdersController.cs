@@ -44,20 +44,25 @@ public class OrdersController : ControllerBase
     }
 
     /// <summary>
-    /// UC015:購入履歴を検索する
+    /// 購入履歴を検索する（UC015）
     /// </summary>
     /// <param name="orderDate">購入日。指定しない場合は条件に含めない</param>
     /// <param name="customerAccountName">顧客アカウント名。指定しない場合は条件に含めない</param>
+    /// <param name="orderStatusId">注文ステータスID。指定しない場合は条件に含めない</param>
     /// <returns>条件に一致する注文の一覧（新しい順）</returns>
-    /// <remarks>両方を省略した場合はすべての注文を返す。</remarks>
+    /// <remarks>
+    /// 購入日・顧客アカウント名・注文ステータスで絞り込む。すべて省略した場合はすべての注文を返す。
+    /// 注文明細を含めて返す。該当が0件の場合は空の配列を返す。
+    /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IReadOnlyList<OrderResponse>>> SearchAsync(
         [FromQuery] DateOnly? orderDate,
-        [FromQuery] string? customerAccountName)
+        [FromQuery] string? customerAccountName,
+        [FromQuery] int? orderStatusId)
     {
-        var param = new OrderHistorySearchParam(orderDate, customerAccountName);
+        var param = new OrderHistorySearchParam(orderDate, customerAccountName, orderStatusId);
         var orders = await _orderHistorySearchUsecase.ExecuteAsync(param);
 
         // 該当0件は正常系のため、空配列を返す

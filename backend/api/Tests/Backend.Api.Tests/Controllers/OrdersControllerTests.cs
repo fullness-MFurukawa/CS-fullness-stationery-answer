@@ -69,7 +69,7 @@ public class OrdersControllerTests
             .Setup(u => u.ExecuteAsync(It.IsAny<OrderHistorySearchParam>()))
             .ReturnsAsync(orders);
 
-        var result = await _controller.SearchAsync(null, null);
+        var result = await _controller.SearchAsync(null, null, null);
 
         var ok = result.Result as OkObjectResult;
         Assert.IsNotNull(ok);
@@ -87,7 +87,7 @@ public class OrdersControllerTests
             .Setup(u => u.ExecuteAsync(It.IsAny<OrderHistorySearchParam>()))
             .ReturnsAsync(new List<Order>());
 
-        var result = await _controller.SearchAsync(null, null);
+        var result = await _controller.SearchAsync(null, null, null);
 
         var ok = result.Result as OkObjectResult;
         Assert.IsNotNull(ok);
@@ -106,11 +106,44 @@ public class OrdersControllerTests
             .Setup(u => u.ExecuteAsync(It.IsAny<OrderHistorySearchParam>()))
             .ReturnsAsync(new List<Order>());
 
-        await _controller.SearchAsync(orderDate, accountName);
+        await _controller.SearchAsync(orderDate, accountName, null);
 
         _orderHistorySearchUsecase.Verify(
             u => u.ExecuteAsync(It.Is<OrderHistorySearchParam>(
                 p => p.OrderDate == orderDate && p.CustomerAccountName == accountName)),
+            Times.Once);
+    }
+
+    [TestMethod(DisplayName = "購入履歴検索は注文ステータスIDをユースケースへ渡す")]
+    public async Task SearchAsync_PassesOrderStatusIdToUsecase()
+    {
+        _orderHistorySearchUsecase
+            .Setup(u => u.ExecuteAsync(It.IsAny<OrderHistorySearchParam>()))
+            .ReturnsAsync(new List<Order>());
+
+        await _controller.SearchAsync(null, null, 3);
+
+        _orderHistorySearchUsecase.Verify(
+            u => u.ExecuteAsync(It.Is<OrderHistorySearchParam>(p => p.OrderStatusId == 3)),
+            Times.Once);
+    }
+
+    [TestMethod(DisplayName = "購入履歴検索はすべての検索条件をユースケースへ渡す")]
+    public async Task SearchAsync_PassesAllConditionsToUsecase()
+    {
+        var orderDate = new DateOnly(2024, 5, 12);
+        const string accountName = "testuser";
+        _orderHistorySearchUsecase
+            .Setup(u => u.ExecuteAsync(It.IsAny<OrderHistorySearchParam>()))
+            .ReturnsAsync(new List<Order>());
+
+        await _controller.SearchAsync(orderDate, accountName, 3);
+
+        _orderHistorySearchUsecase.Verify(
+            u => u.ExecuteAsync(It.Is<OrderHistorySearchParam>(
+                p => p.OrderDate == orderDate
+                  && p.CustomerAccountName == accountName
+                  && p.OrderStatusId == 3)),
             Times.Once);
     }
 

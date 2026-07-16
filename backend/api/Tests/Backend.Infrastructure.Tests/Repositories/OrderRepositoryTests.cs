@@ -92,7 +92,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     {
         var repository = CreateRepository();
 
-        var orders = await repository.SearchAsync(new DateOnly(2024, 5, 12), null);
+        var orders = await repository.SearchAsync(new DateOnly(2024, 5, 12), null, null);
 
         Assert.HasCount(1, orders);
         Assert.AreEqual(100, orders[0].AmountTotal);
@@ -104,7 +104,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     {
         var repository = CreateRepository();
 
-        var orders = await repository.SearchAsync(null, "taro123");
+        var orders = await repository.SearchAsync(null, "taro123", null);
 
         Assert.HasCount(1, orders);
         Assert.AreEqual(3800, orders[0].AmountTotal);
@@ -116,7 +116,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     {
         var repository = CreateRepository();
 
-        var orders = await repository.SearchAsync(new DateOnly(2024, 5, 12), "testuser");
+        var orders = await repository.SearchAsync(new DateOnly(2024, 5, 12), "testuser", null);
 
         Assert.HasCount(1, orders);
         Assert.AreEqual(100, orders[0].AmountTotal);
@@ -127,7 +127,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     {
         var repository = CreateRepository();
 
-        var orders = await repository.SearchAsync(null, null);
+        var orders = await repository.SearchAsync(null, null, null);
 
         Assert.HasCount(4, orders);
     }
@@ -137,7 +137,7 @@ public class OrderRepositoryTests : RepositoryTestBase
     {
         var repository = CreateRepository();
 
-        var orders = await repository.SearchAsync(new DateOnly(2020, 1, 1), null);
+        var orders = await repository.SearchAsync(new DateOnly(2020, 1, 1), null, null);
 
         Assert.HasCount(0, orders);
     }
@@ -232,5 +232,37 @@ public class OrderRepositoryTests : RepositoryTestBase
 
         // 入金済(ID:2)の注文は存在しない
         Assert.IsFalse(counts.ContainsKey(2));
+    }
+
+    [TestMethod(DisplayName = "注文ステータスを指定して注文を検索できる")]
+    public async Task SearchAsync_ByOrderStatus_ReturnsMatchingOrders()
+    {
+        var repository = CreateRepository();
+        // 完了(ID:4)の注文は2件
+        var orders = await repository.SearchAsync(null, null, 4);
+
+        Assert.HasCount(2, orders);
+        Assert.IsTrue(orders.All(o => o.Status.Id == 4));
+    }
+
+    [TestMethod(DisplayName = "該当する注文が無いステータスを指定すると空の一覧を返す")]
+    public async Task SearchAsync_ByStatusWithoutOrders_ReturnsEmptyList()
+    {
+        var repository = CreateRepository();
+        // 入金済(ID:2)の注文は存在しない
+        var orders = await repository.SearchAsync(null, null, 2);
+
+        Assert.HasCount(0, orders);
+    }
+
+    [TestMethod(DisplayName = "購入日と注文ステータスを組み合わせて検索できる")]
+    public async Task SearchAsync_ByOrderDateAndStatus_ReturnsMatchingOrders()
+    {
+        var repository = CreateRepository();
+        // 2024-05-12 の注文は1件（配送中）
+        var orders = await repository.SearchAsync(new DateOnly(2024, 5, 12), null, 3);
+
+        Assert.HasCount(1, orders);
+        Assert.AreEqual("配送中", orders[0].Status.Name);
     }
 }

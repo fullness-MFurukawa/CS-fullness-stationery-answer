@@ -14,12 +14,13 @@ public interface IOrderRepository
     Task<IReadOnlyList<Order>> FindAllAsync();
 
     /// <summary>
-    /// 購入日・顧客アカウント名で注文を検索
+    /// 購入日・顧客アカウント名・注文ステータスで注文を検索
     /// </summary>
     /// <param name="orderDate">購入日。指定しない場合はnull</param>
     /// <param name="customerAccountName">顧客アカウント名。指定しない場合はnull</param>
+    /// <param name="orderStatusId">注文ステータスID。指定しない場合はnull</param>
     /// <returns>条件に一致する注文の一覧</returns>
-    Task<IReadOnlyList<Order>> SearchAsync(DateOnly? orderDate, string? customerAccountName);
+    Task<IReadOnlyList<Order>> SearchAsync(DateOnly? orderDate, string? customerAccountName, int? orderStatusId);
 
     /// <summary>
     /// 識別IDを指定して注文を取得

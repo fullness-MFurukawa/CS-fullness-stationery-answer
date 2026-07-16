@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { ImageOff, Pencil, Trash2 } from "lucide-react";
 import type { Product } from "@/models/responses/product";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -12,17 +11,20 @@ import { Button } from "@/components/ui/button";
  * 商品カード
  * 商品検索画面（BP006）で、商品1件を表示する。
  * @param product 表示する商品
+ * @param onEdit 修正ボタンが押されたときの処理
  * @param onDelete 削除ボタンが押されたときの処理
  */
 export function ProductCard({
   product,
+  onEdit,
   onDelete,
 }: {
   product: Product;
+  onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
 }) {
   return (
-    <Card className="flex flex-col overflow-hidden pt-0">
+    <Card className="flex flex-col overflow-hidden pt-0!">
       <div className="relative aspect-square bg-muted">
         {product.imageUrl ? (
           <Image
@@ -58,14 +60,11 @@ export function ProductCard({
           variant="outline"
           size="sm"
           className="flex-1"
-          nativeButton={false}
-          render={
-            <Link href={`/admin/products/${product.productId}/edit`}>
-              <Pencil />
-              修正
-            </Link>
-          }
-        />
+          onClick={() => onEdit(product)}
+        >
+          <Pencil />
+          修正
+        </Button>
         <Button
           variant="outline"
           size="sm"

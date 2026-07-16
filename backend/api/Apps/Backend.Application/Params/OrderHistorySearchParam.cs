@@ -5,6 +5,8 @@ namespace Backend.Application.Params;
 /// </summary>
 /// <param name="OrderDate">購入日。指定しない場合はnull</param>
 /// <param name="CustomerAccountName">顧客アカウント名。指定しない場合はnull</param>
+/// <param name="OrderStatusId">注文ステータスID。指定しない場合はnull</param>
 public sealed record OrderHistorySearchParam(
     DateOnly? OrderDate,
-    string? CustomerAccountName);
+    string? CustomerAccountName,
+    int? OrderStatusId = null);

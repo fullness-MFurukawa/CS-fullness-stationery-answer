@@ -31,7 +31,11 @@ export class ProductRepository implements IProductRepository {
      * 新しい商品を登録する（UC010）
      */
     async register(request: ProductRegisterRequest): Promise<Product> {
-        const formData = this.toFormData(request);
+        const formData = new FormData();
+        this.appendCommonFields(formData, request);
+        if (request.image) {
+            formData.append("Image", request.image);
+        }
         return this.httpClient.sendForm<Product>("POST", "/api/admin/products", formData);
     }
 
@@ -39,7 +43,14 @@ export class ProductRepository implements IProductRepository {
      * 商品情報を修正する（UC012）
      */
     async update(request: ProductUpdateRequest): Promise<Product> {
-        const formData = this.toFormData(request);
+        const formData = new FormData();
+        this.appendCommonFields(formData, request);
+        if (request.image) {
+            formData.append("Image", request.image);
+        }
+        // 画像の削除指定を伝える（新しい画像を指定した場合は差し替えとなるため無視される）
+        formData.append("RemoveImage", String(request.removeImage));
+
         return this.httpClient.sendForm<Product>(
             "PUT",
             `/api/admin/products/${request.productId}`,
@@ -55,18 +66,16 @@ export class ProductRepository implements IProductRepository {
     }
 
     /**
-     * 登録・修正のリクエストを multipart/form-data の本文へ変換する
+     * 登録・修正で共通する項目を multipart/form-data の本文へ追加する
      * @remarks フィールド名はバックエンドの ViewModel のプロパティ名に一致させる。
      */
-    private toFormData(request: ProductRegisterRequest | ProductUpdateRequest): FormData {
-        const formData = new FormData();
+    private appendCommonFields(
+        formData: FormData,
+        request: ProductRegisterRequest | ProductUpdateRequest,
+    ): void {
         formData.append("Name", request.name);
         formData.append("Price", String(request.price));
         formData.append("CategoryId", request.categoryId);
         formData.append("Quantity", String(request.quantity));
-        if (request.image) {
-            formData.append("Image", request.image);
-        }
-        return formData;
     }
 }

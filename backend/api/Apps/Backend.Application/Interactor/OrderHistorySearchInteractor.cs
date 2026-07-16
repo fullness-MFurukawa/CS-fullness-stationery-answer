@@ -29,6 +29,9 @@ public class OrderHistorySearchInteractor : IOrderHistorySearchUsecase
     public async Task<IReadOnlyList<Order>> ExecuteAsync(OrderHistorySearchParam param)
     {
         // 条件が未指定（両方null）の場合は全件が返る
-        return await _orderRepository.SearchAsync(param.OrderDate, param.CustomerAccountName);
+        return await _orderRepository.SearchAsync(
+            param.OrderDate,
+            param.CustomerAccountName,
+            param.OrderStatusId);
     }
 }

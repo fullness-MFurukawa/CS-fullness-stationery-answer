@@ -70,13 +70,14 @@ public class OrderRepository : IOrderRepository
     }
 
     /// <summary>
-    /// 購入日・顧客アカウント名で注文を検索
+    /// 購入日・顧客アカウント名・注文ステータスで注文を検索
     /// </summary>
     /// <param name="orderDate">購入日。指定しない場合はnull</param>
     /// <param name="customerAccountName">顧客アカウント名。指定しない場合はnull</param>
+    /// <param name="orderStatusId">注文ステータスID。指定しない場合はnull</param>
     /// <returns>条件に一致する注文の一覧</returns>
     /// <exception cref="InternalException">データベースからの取得に失敗した場合</exception>
-    public async Task<IReadOnlyList<Order>> SearchAsync(DateOnly? orderDate, string? customerAccountName)
+    public async Task<IReadOnlyList<Order>> SearchAsync(DateOnly? orderDate, string? customerAccountName, int? orderStatusId)
     {
         try
         {
@@ -93,6 +94,11 @@ public class OrderRepository : IOrderRepository
             if (!string.IsNullOrWhiteSpace(customerAccountName))
             {
                 query = query.Where(e => e.Customer.Username == customerAccountName);
+            }
+
+            if (orderStatusId is not null)
+            {
+                query = query.Where(e => e.OrderStatusId == orderStatusId.Value);
             }
 
             var entities = await query

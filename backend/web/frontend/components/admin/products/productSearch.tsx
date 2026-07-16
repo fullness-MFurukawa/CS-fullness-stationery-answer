@@ -9,6 +9,7 @@ import type { Product } from "@/models/responses/product";
 import type { Category } from "@/models/responses/category";
 import { ApiError } from "@/infrastructure/http/apiError";
 import { ProductCard } from "./productCard";
+import { ProductEditDialog } from "./productEditDialog";
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ export function ProductSearch() {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editTarget, setEditTarget] = useState<Product | null>(null);
 
   // Serviceの取得はレンダリングのたびに行わない
   const service = useMemo(
@@ -156,14 +158,27 @@ export function ProductSearch() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
-            <ProductCard
+             <ProductCard
               key={product.productId}
               product={product}
+              onEdit={setEditTarget}
               onDelete={setDeleteTarget}
             />
           ))}
         </div>
       )}
+
+      <ProductEditDialog
+        product={editTarget}
+        categories={categories}
+        onClose={() => setEditTarget(null)}
+        onUpdated={(updated) =>
+          setProducts((prev) =>
+            prev.map((p) => (p.productId === updated.productId ? updated : p)),
+          )
+        }
+      />
+
 
       <AlertDialog
         open={deleteTarget !== null}

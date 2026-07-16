@@ -52,12 +52,12 @@ public class OrderHistorySearchInteractorTests
     public async Task ExecuteAsync_WithoutConditions_SearchesWithNullConditions()
     {
         IReadOnlyList<Order> expected = [CreateOrder(), CreateOrder()];
-        _orderRepository.Setup(r => r.SearchAsync(null, null)).ReturnsAsync(expected);
+        _orderRepository.Setup(r => r.SearchAsync(null, null, null)).ReturnsAsync(expected);
 
         var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(null, null));
 
         Assert.HasCount(2, orders);
-        _orderRepository.Verify(r => r.SearchAsync(null, null), Times.Once);
+        _orderRepository.Verify(r => r.SearchAsync(null, null, null), Times.Once);
     }
 
     [TestMethod(DisplayName = "購入日を指定した場合はその条件で検索する")]
@@ -65,24 +65,24 @@ public class OrderHistorySearchInteractorTests
     {
         var orderDate = new DateOnly(2024, 5, 12);
         IReadOnlyList<Order> expected = [CreateOrder(100)];
-        _orderRepository.Setup(r => r.SearchAsync(orderDate, null)).ReturnsAsync(expected);
+        _orderRepository.Setup(r => r.SearchAsync(orderDate, null, null)).ReturnsAsync(expected);
 
         var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(orderDate, null));
 
         Assert.HasCount(1, orders);
-        _orderRepository.Verify(r => r.SearchAsync(orderDate, null), Times.Once);
+        _orderRepository.Verify(r => r.SearchAsync(orderDate, null, null), Times.Once);
     }
 
     [TestMethod(DisplayName = "顧客アカウント名を指定した場合はその条件で検索する")]
     public async Task ExecuteAsync_WithCustomerAccountName_PassesAccountName()
     {
         IReadOnlyList<Order> expected = [CreateOrder(3800)];
-        _orderRepository.Setup(r => r.SearchAsync(null, "taro123")).ReturnsAsync(expected);
+        _orderRepository.Setup(r => r.SearchAsync(null, "taro123", null)).ReturnsAsync(expected);
 
         var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(null, "taro123"));
 
         Assert.HasCount(1, orders);
-        _orderRepository.Verify(r => r.SearchAsync(null, "taro123"), Times.Once);
+        _orderRepository.Verify(r => r.SearchAsync(null, "taro123", null), Times.Once);
     }
 
     [TestMethod(DisplayName = "購入日と顧客アカウント名の両方を指定した場合は両方の条件で検索する")]
@@ -90,23 +90,50 @@ public class OrderHistorySearchInteractorTests
     {
         var orderDate = new DateOnly(2024, 5, 12);
         IReadOnlyList<Order> expected = [CreateOrder(100)];
-        _orderRepository.Setup(r => r.SearchAsync(orderDate, "testuser")).ReturnsAsync(expected);
+        _orderRepository.Setup(r => r.SearchAsync(orderDate, "testuser", null)).ReturnsAsync(expected);
 
         var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(orderDate, "testuser"));
 
         Assert.HasCount(1, orders);
-        _orderRepository.Verify(r => r.SearchAsync(orderDate, "testuser"), Times.Once);
+        _orderRepository.Verify(r => r.SearchAsync(orderDate, "testuser", null), Times.Once);
     }
 
     [TestMethod(DisplayName = "該当する注文が0件でも例外にせず空の一覧を返す")]
     public async Task ExecuteAsync_NoMatch_ReturnsEmptyList()
     {
         _orderRepository
-            .Setup(r => r.SearchAsync(It.IsAny<DateOnly?>(), It.IsAny<string?>()))
+            .Setup(r => r.SearchAsync(It.IsAny<DateOnly?>(), It.IsAny<string?>(), null))
             .ReturnsAsync([]);
 
         var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(new DateOnly(2020, 1, 1), null));
 
         Assert.HasCount(0, orders);
     }
+
+    [TestMethod(DisplayName = "注文ステータスを指定した場合はその条件で検索する")]
+    public async Task ExecuteAsync_WithOrderStatusId_PassesStatusId()
+    {
+        IReadOnlyList<Order> expected = [CreateOrder()];
+        _orderRepository.Setup(r => r.SearchAsync(null, null, 3)).ReturnsAsync(expected);
+
+        var orders = await _interactor.ExecuteAsync(new OrderHistorySearchParam(null, null, 3));
+
+        Assert.HasCount(1, orders);
+        _orderRepository.Verify(r => r.SearchAsync(null, null, 3), Times.Once);
+    }
+
+    [TestMethod(DisplayName = "すべての条件を指定した場合はすべての条件で検索する")]
+    public async Task ExecuteAsync_WithAllConditions_PassesAllConditions()
+    {
+        var orderDate = new DateOnly(2024, 5, 12);
+        IReadOnlyList<Order> expected = [CreateOrder(100)];
+        _orderRepository.Setup(r => r.SearchAsync(orderDate, "testuser", 3)).ReturnsAsync(expected);
+
+        var orders = await _interactor.ExecuteAsync(
+            new OrderHistorySearchParam(orderDate, "testuser", 3));
+
+        Assert.HasCount(1, orders);
+        _orderRepository.Verify(r => r.SearchAsync(orderDate, "testuser", 3), Times.Once);
+    }
+
 }

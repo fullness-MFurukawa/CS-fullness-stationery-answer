@@ -140,6 +140,7 @@ describe("ProductRepositoryの単体テストドライバ", () => {
                 categoryId: "cat-1",
                 quantity: 20,
                 image: null,
+                removeImage: false,
             };
             await repository.update(request);
 
@@ -150,6 +151,25 @@ describe("ProductRepositoryの単体テストドライバ", () => {
             const form = options.body as FormData;
             expect(form.get("productId")).toBeNull();
             expect(form.get("ProductId")).toBeNull();
+        });
+        it("画像の削除を指定するとRemoveImageをtrueで送る", async () => {
+            const fetchMock = mockFetch(200, sampleProduct);
+            vi.stubGlobal("fetch", fetchMock);
+
+            const request: ProductUpdateRequest = {
+                productId: "aaaa-1111",
+                name: "テスト商品",
+                price: 550,
+                categoryId: "cat-1",
+                quantity: 20,
+                image: null,
+                removeImage: true,
+            };
+            await repository.update(request);
+
+            const form = fetchMock.mock.calls[0][1].body as FormData;
+            expect(form.get("RemoveImage")).toBe("true");
+            expect(form.get("Image")).toBeNull();
         });
     });
 
