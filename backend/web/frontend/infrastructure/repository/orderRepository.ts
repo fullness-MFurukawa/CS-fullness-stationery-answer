@@ -21,13 +21,16 @@ export class OrderRepository implements IOrderRepository {
     /**
      * 購入履歴を検索する（UC015）
      */
-    async search(orderDate?: string, customerAccountName?: string): Promise<Order[]> {
+    async search(orderDate?: string,customerAccountName?: string,orderStatusId?: number): Promise<Order[]> {
         const params = new URLSearchParams();
         if (orderDate) {
             params.append("orderDate", orderDate);
         }
         if (customerAccountName) {
             params.append("customerAccountName", customerAccountName);
+        }
+        if (orderStatusId !== undefined) {
+            params.append("orderStatusId", String(orderStatusId));
         }
         const query = params.toString();
         const path = query ? `/api/admin/orders?${query}` : "/api/admin/orders";

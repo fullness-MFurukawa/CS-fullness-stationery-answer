@@ -26,19 +26,19 @@ export class OrderService implements IOrderService {
      * 購入履歴検索画面の初期表示に必要なデータを取得する（UC015）
      * @remarks 注文一覧とステータス一覧は互いに依存しないため、並行して取得する。
      */
-    async getSearchView(orderDate?: string, customerAccountName?: string): Promise<OrderSearchView> {
+    async getSearchView(orderDate?: string,customerAccountName?: string,orderStatusId?: number): Promise<OrderSearchView> {
         const [orders, statuses] = await Promise.all([
-            this.orderRepository.search(orderDate, customerAccountName),
+            this.orderRepository.search(orderDate, customerAccountName, orderStatusId),
             this.orderStatusRepository.search(),
         ]);
         return { orders, statuses };
-    }
+  }
 
     /**
      * 購入履歴を検索する（UC015）
      */
-    async search(orderDate?: string, customerAccountName?: string): Promise<Order[]> {
-        return this.orderRepository.search(orderDate, customerAccountName);
+    async search(orderDate?: string,customerAccountName?: string,orderStatusId?: number,): Promise<Order[]> {
+        return this.orderRepository.search(orderDate, customerAccountName, orderStatusId);
     }
 
     /**

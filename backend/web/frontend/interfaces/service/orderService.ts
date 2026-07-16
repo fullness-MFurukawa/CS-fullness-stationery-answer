@@ -21,18 +21,20 @@ export interface IOrderService {
      * 注文一覧と、ステータス更新の選択肢となるステータス一覧を同時に取得する。
      * @param orderDate 購入日（yyyy-MM-dd）。未指定の場合は条件に含めない
      * @param customerAccountName 顧客アカウント名。未指定の場合は条件に含めない
+     * @param orderStatusId 注文ステータスID。未指定の場合は条件に含めない
      * @returns 注文一覧とステータス一覧
      */
-    getSearchView(orderDate?: string, customerAccountName?: string): Promise<OrderSearchView>;
+    getSearchView(orderDate?: string,customerAccountName?: string,orderStatusId?: number): Promise<OrderSearchView>;
 
     /**
      * 購入履歴を検索する（UC015）
      * 検索条件の変更時など、注文一覧のみを再取得する場合に使用する。
      * @param orderDate 購入日（yyyy-MM-dd）。未指定の場合は条件に含めない
      * @param customerAccountName 顧客アカウント名。未指定の場合は条件に含めない
+     * @param orderStatusId 注文ステータスID。未指定の場合は条件に含めない
      * @returns 条件に一致する注文の一覧（新しい順）
      */
-    search(orderDate?: string, customerAccountName?: string): Promise<Order[]>;
+    search(orderDate?: string,customerAccountName?: string,orderStatusId?: number): Promise<Order[]>;
 
     /**
      * ステータス更新の選択肢として使用する注文ステータス一覧を取得する

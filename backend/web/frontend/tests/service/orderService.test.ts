@@ -61,7 +61,7 @@ describe("OrderServiceの単体テストドライバ", () => {
         it("検索条件を注文リポジトリへ渡す", async () => {
             await service.getSearchView("2024-05-12", "testuser");
 
-            expect(orderRepository.search).toHaveBeenCalledWith("2024-05-12", "testuser");
+            expect(orderRepository.search).toHaveBeenCalledWith("2024-05-12", "testuser", undefined);
         });
     });
 
@@ -69,7 +69,7 @@ describe("OrderServiceの単体テストドライバ", () => {
         it("注文リポジトリのみを呼び出す", async () => {
             const result = await service.search("2024-05-12");
 
-            expect(orderRepository.search).toHaveBeenCalledWith("2024-05-12", undefined);
+            expect(orderRepository.search).toHaveBeenCalledWith("2024-05-12", undefined, undefined);
             expect(orderStatusRepository.search).not.toHaveBeenCalled();
             expect(result).toHaveLength(1);
         });

@@ -15,10 +15,20 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+/** ステータス絞り込みの「すべて」を表す値 */
+const ALL_STATUSES = "all";
 
 /**
  * BP015 購入履歴検索画面の本体
- * 注文を一覧表示し、購入日と顧客アカウント名による絞り込みと、
+ * 注文を一覧表示し、購入日・顧客アカウント名・注文ステータスによる絞り込みと、
  * 注文ステータスの更新を行う。
  */
 export function OrderSearch() {
@@ -26,6 +36,7 @@ export function OrderSearch() {
   const [statuses, setStatuses] = useState<OrderStatus[]>([]);
   const [orderDate, setOrderDate] = useState("");
   const [customerAccountName, setCustomerAccountName] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>(ALL_STATUSES);
   const [isLoading, setIsLoading] = useState(true);
 
   const service = useMemo(
@@ -65,6 +76,7 @@ export function OrderSearch() {
       const result = await service.search(
         orderDate || undefined,
         customerAccountName.trim() || undefined,
+        statusFilter === ALL_STATUSES ? undefined : Number(statusFilter),
       );
       setOrders(result);
     } catch (e) {
@@ -80,6 +92,7 @@ export function OrderSearch() {
   const handleClear = async () => {
     setOrderDate("");
     setCustomerAccountName("");
+    setStatusFilter(ALL_STATUSES);
     setIsLoading(true);
     try {
       const result = await service.search();
@@ -113,7 +126,12 @@ export function OrderSearch() {
     }
   };
 
-  const hasCondition = orderDate !== "" || customerAccountName !== "";
+  const hasCondition =
+    orderDate !== "" || customerAccountName !== "" || statusFilter !== ALL_STATUSES;
+
+  const selectedStatus = statuses.find(
+    (s) => String(s.orderStatusId) === statusFilter,
+  );
 
   return (
     <div className="space-y-6">
@@ -147,6 +165,33 @@ export function OrderSearch() {
                 onChange={(e) => setCustomerAccountName(e.target.value)}
                 className="w-56"
               />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="statusFilter">注文ステータス</Label>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value ?? ALL_STATUSES)}
+              >
+                <SelectTrigger id="statusFilter" className="w-40">
+                  <SelectValue>
+                    {statusFilter === ALL_STATUSES
+                      ? "すべて"
+                      : selectedStatus?.name}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_STATUSES}>すべて</SelectItem>
+                  {statuses.map((status) => (
+                    <SelectItem
+                      key={status.orderStatusId}
+                      value={String(status.orderStatusId)}
+                    >
+                      {status.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex gap-2">
