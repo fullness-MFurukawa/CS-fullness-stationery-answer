@@ -22,7 +22,7 @@ public class ProductUpdateRequestAdapter : IEntityAdapter<ProductUpdateRequest, 
     /// <returns>商品修正の入力値</returns>
     /// <remarks>
     /// 画像ファイルが指定された場合は、ストリームとメタ情報を入力値へ引き渡す。
-    /// 未指定の場合は既存の画像を維持する。
+    /// 未指定かつ削除指定もない場合は既存の画像を維持する。
     /// </remarks>
     public ProductUpdateParam ToDomain(ProductUpdateRequest source)
     {
@@ -37,7 +37,8 @@ public class ProductUpdateRequestAdapter : IEntityAdapter<ProductUpdateRequest, 
             image?.OpenReadStream(),
             image?.FileName,
             image?.ContentType,
-            image?.Length ?? 0);
+            image?.Length ?? 0,
+            source.RemoveImage);
     }
 
     /// <summary>

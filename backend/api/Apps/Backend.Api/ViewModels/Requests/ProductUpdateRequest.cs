@@ -11,8 +11,12 @@ namespace Backend.Api.ViewModels.Requests;
 /// <param name="CategoryId">商品カテゴリ識別ID(uuid)</param>
 /// <param name="Quantity">在庫数</param>
 /// <param name="Image">差し替える商品画像ファイル。未指定の場合は既存の画像を維持する</param>
+/// <param name="RemoveImage">既存の画像を削除する場合はtrue</param>
 /// <remarks>
 /// 画像ファイルを含むため multipart/form-data で受け取る。
+/// 画像の扱いは3通りとする。
+/// Image を指定した場合は差し替え、RemoveImage が true の場合は削除、
+/// どちらも指定しない場合は既存の画像を維持する。
 /// </remarks>
 public sealed record ProductUpdateRequest(
     [Required(ErrorMessage = "商品名を入力してください")]
@@ -30,7 +34,9 @@ public sealed record ProductUpdateRequest(
     [Range(0, int.MaxValue, ErrorMessage = "在庫数は0以上で入力してください")]
     int? Quantity,
 
-    IFormFile? Image)
+    IFormFile? Image,
+
+    bool RemoveImage = false)
 {
     /// <summary>
     /// 修正対象の商品識別ID(uuid)

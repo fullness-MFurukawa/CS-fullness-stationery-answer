@@ -58,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     session: {
         strategy: "jwt",
-        // バックエンドのアクセストークンの有効期限（30分）に合わせる
+        // 動作確認のため一時的に60秒。確認後は 30 * 60（30分）に戻す
         maxAge: 30 * 60,
     },
 
@@ -88,6 +88,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     pages: {
         // 独自のログイン画面を使う
-        signIn: "/login",
+        signIn: "/admin/login",
     },
 });

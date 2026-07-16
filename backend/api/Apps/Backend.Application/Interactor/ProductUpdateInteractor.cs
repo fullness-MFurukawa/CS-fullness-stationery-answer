@@ -58,8 +58,8 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
                 new ImageUploadParam(param.ImageContent, param.ImageFileName!, param.ImageContentType!, param.ImageLength));
         }
 
-        // 差し替え成功後に削除する、更新前の古い画像URL
-        string? oldImageUrl = null;
+        // 更新成功後に削除する、不要になった画像のURL
+        string? obsoleteImageUrl = null;
 
         try
         {
@@ -79,12 +79,24 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
                 var category = await _productCategoryRepository.FindByIdAsync(param.CategoryId)
                     ?? throw new NotFoundException("指定された商品カテゴリが存在しません。");
 
-                // 画像を新しく指定した場合は差し替える。指定がなければ既存の画像URLを維持する
-                var imageUrl = current.ImageUrl;
+                // 画像の扱いを決める
+                string? imageUrl;
                 if (newImageUrl is not null)
                 {
-                    oldImageUrl = current.ImageUrl;   // 更新成功後に削除する
+                    // 新しい画像を指定した場合は差し替え、古い画像は更新成功後に削除する
                     imageUrl = newImageUrl;
+                    obsoleteImageUrl = current.ImageUrl;
+                }
+                else if (param.RemoveImage)
+                {
+                    // 画像の削除を指定した場合は画像なしにし、既存の画像は更新成功後に削除する
+                    imageUrl = null;
+                    obsoleteImageUrl = current.ImageUrl;
+                }
+                else
+                {
+                    // 指定がない場合は既存の画像を維持する
+                    imageUrl = current.ImageUrl;
                 }
 
                 // 識別子は維持したまま、新しい値で商品集約を再構築する
@@ -102,12 +114,12 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
                 return updated;
             });
 
-            // 更新が確定した後に、差し替え前の古い画像を削除する（孤児を残さない）
-            if (oldImageUrl is not null)
+            // 更新が確定した後に、不要になった画像を削除する（孤児を残さない）
+            if (obsoleteImageUrl is not null)
             {
                 try
                 {
-                    await _imageStorage.DeleteAsync(oldImageUrl);
+                    await _imageStorage.DeleteAsync(obsoleteImageUrl);
                 }
                 catch
                 {
@@ -120,7 +132,7 @@ public class ProductUpdateInteractor : IProductUpdateUsecase
         }
         catch
         {
-            // 更新に失敗した場合、新しく保存した画像を取り消す（古い画像はそのまま残す）
+            // 更新に失敗した場合、新しく保存した画像を取り消す（既存の画像はそのまま残す）
             if (newImageUrl is not null)
             {
                 await _imageStorage.DeleteAsync(newImageUrl);

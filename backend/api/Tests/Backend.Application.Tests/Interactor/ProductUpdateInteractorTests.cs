@@ -229,4 +229,35 @@ public class ProductUpdateInteractorTests
 
         _productRepository.Verify(r => r.UpdateAsync(It.IsAny<Product>()), Times.Never);
     }
+
+
+    [TestMethod(DisplayName = "画像の削除を指定した場合は画像URLをnullにする")]
+    public async Task ExecuteAsync_RemoveImage_SetsImageUrlToNull()
+    {
+        var param = CreateParam() with { RemoveImage = true };
+
+        var product = await _interactor.ExecuteAsync(param);
+
+        Assert.IsNull(product.ImageUrl);
+    }
+
+    [TestMethod(DisplayName = "画像の削除を指定した場合は更新後に既存の画像を削除する")]
+    public async Task ExecuteAsync_RemoveImage_DeletesExistingImage()
+    {
+        var param = CreateParam() with { RemoveImage = true };
+
+        await _interactor.ExecuteAsync(param);
+
+        _imageStorage.Verify(s => s.DeleteAsync("https://example.com/old.png"), Times.Once);
+    }
+
+    [TestMethod(DisplayName = "画像の削除を指定した場合は画像アップロードを行わない")]
+    public async Task ExecuteAsync_RemoveImage_DoesNotUploadImage()
+    {
+        var param = CreateParam() with { RemoveImage = true };
+
+        await _interactor.ExecuteAsync(param);
+
+        _imageUploadUsecase.Verify(u => u.ExecuteAsync(It.IsAny<ImageUploadParam>()), Times.Never);
+    }
 }
