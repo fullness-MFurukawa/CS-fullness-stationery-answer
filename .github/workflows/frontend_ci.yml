@@ -6,11 +6,13 @@ on:
     paths:
       - "backend/web/frontend/**"
       - ".github/workflows/frontend_ci.yml"
+      - ".github/workflows/frontend_cd.yml"
   pull_request:
     branches: [main]
     paths:
       - "backend/web/frontend/**"
       - ".github/workflows/frontend_ci.yml"
+      - ".github/workflows/frontend_cd.yml"
   workflow_dispatch:
 
 # E2Eテストは Azure の実データベースを更新するため、
