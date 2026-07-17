@@ -1,18 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 import Image from "next/image";
 import { ImagePlus, X } from "lucide-react";
-import { container } from "@/di/container";
-import { TYPES } from "@/di/types";
-import type { IProductService } from "@/interfaces/service/productService";
+import { useProductEdit } from "@/hooks/admin/products/useProductEdit";
 import type { Product } from "@/models/responses/product";
 import type { Category } from "@/models/responses/category";
-import { ApiError } from "@/infrastructure/http/apiError";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -67,7 +63,10 @@ const productSchema = z.object({
     .nullable(),
 });
 
+/** フォームの入力値の型（変換前。price と quantity は文字列として入力される） */
 type ProductFormInput = z.input<typeof productSchema>;
+
+/** フォームの検証済みの値の型（変換後） */
 type ProductFormValues = z.output<typeof productSchema>;
 
 /**
@@ -89,15 +88,11 @@ export function ProductEditDialog({
   onClose: () => void;
   onUpdated: (updated: Product) => void;
 }) {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { isUpdating, update } = useProductEdit();
+
   // 既存の画像を削除するかどうか
   const [removeImage, setRemoveImage] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const service = useMemo(
-    () => container.get<IProductService>(TYPES.ProductService),
-    [],
-  );
 
   const {
     register,
@@ -152,24 +147,19 @@ export function ProductEditDialog({
   const onSubmit = async (values: ProductFormValues) => {
     if (!product) return;
 
-    setIsUpdating(true);
-    try {
-      const updated = await service.update({
-        productId: product.productId,
-        name: values.name,
-        price: values.price,
-        categoryId: values.categoryId,
-        quantity: values.quantity,
-        image: values.image,
-        removeImage,
-      });
-      toast.success(`商品「${updated.name}」を修正しました`);
+    const updated = await update({
+      productId: product.productId,
+      name: values.name,
+      price: values.price,
+      categoryId: values.categoryId,
+      quantity: values.quantity,
+      image: values.image,
+      removeImage,
+    });
+
+    if (updated) {
       onUpdated(updated);
       onClose();
-    } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "修正に失敗しました");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -197,7 +187,7 @@ export function ProductEditDialog({
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="edit-categoryId">
               カテゴリ <span className="text-destructive">*</span>
             </Label>

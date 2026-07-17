@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { toast } from "sonner";
 import { Package, FolderTree, Receipt, TrendingUp } from "lucide-react";
-import { container } from "@/di/container";
-import { TYPES } from "@/di/types";
-import type { IDashboardService } from "@/interfaces/service/dashboardService";
-import type { DashboardSummary } from "@/models/responses/dashboardSummary";
+import { useDashboard } from "@/hooks/admin/dashboard/useDashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,27 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * @param employeeName ログイン中の担当者名
  */
 export function Dashboard({ employeeName }: { employeeName: string }) {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const service = useMemo(
-    () => container.get<IDashboardService>(TYPES.DashboardService),
-    [],
-  );
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await service.getSummary();
-        setSummary(result);
-      } catch {
-        toast.error("集計データの取得に失敗しました");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, [service]);
+  const { summary, isLoading } = useDashboard();
 
   const stats = [
     {

@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import Image from "next/image";
 import { ImagePlus, X } from "lucide-react";
-import { container } from "@/di/container";
-import { TYPES } from "@/di/types";
-import type { IProductService } from "@/interfaces/service/productService";
-import type { Category } from "@/models/responses/category";
-import { ApiError } from "@/infrastructure/http/apiError";
+import { useProductRegister } from "@/hooks/admin/products/useProductRegister";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -71,14 +66,12 @@ const productSchema = z.object({
     .nullable(),
 });
 
-
 /** フォームの入力値の型（変換前。price と quantity は文字列として入力される） */
 type ProductFormInput = z.input<typeof productSchema>;
 
 /** フォームの検証済みの値の型（変換後） */
 type ProductFormValues = z.output<typeof productSchema>;
 
-/** フォームの初期値 */
 /** フォームの初期値 */
 const defaultValues: ProductFormInput = {
   name: "",
@@ -94,17 +87,12 @@ const defaultValues: ProductFormInput = {
  */
 export function ProductRegisterForm() {
   const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { categories, isLoading, register: registerProduct } = useProductRegister();
+
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [confirmedValues, setConfirmedValues] = useState<ProductFormValues | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const service = useMemo(
-    () => container.get<IProductService>(TYPES.ProductService),
-    [],
-  );
 
   const {
     register,
@@ -114,32 +102,13 @@ export function ProductRegisterForm() {
     clearErrors,
     reset,
     formState: { errors },
-    } = useForm<ProductFormInput, unknown, ProductFormValues>({
+  } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues,
   });
 
   const categoryId = watch("categoryId");
   const image = watch("image");
-
-  /**
-   * カテゴリ一覧を取得する
-   */
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await service.getCategories();
-        setCategories(result);
-      } catch (e) {
-        toast.error(
-          e instanceof ApiError ? e.message : "カテゴリの取得に失敗しました",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, [service]);
 
   /**
    * 選択された画像のプレビューURLを生成する
@@ -171,25 +140,20 @@ export function ProductRegisterForm() {
     if (!confirmedValues) return;
 
     setIsRegistering(true);
-    try {
-      const product = await service.register({
-        name: confirmedValues.name,
-        price: confirmedValues.price,
-        categoryId: confirmedValues.categoryId,
-        quantity: confirmedValues.quantity,
-        image: confirmedValues.image,
-      });
-      toast.success(`商品「${product.name}」を登録しました`);
+    const succeeded = await registerProduct({
+      name: confirmedValues.name,
+      price: confirmedValues.price,
+      categoryId: confirmedValues.categoryId,
+      quantity: confirmedValues.quantity,
+      image: confirmedValues.image,
+    });
+    setIsRegistering(false);
 
-      setIsConfirmOpen(false);
+    setIsConfirmOpen(false);
+    if (succeeded) {
       setConfirmedValues(null);
       reset(defaultValues);
       clearErrors();
-    } catch (e) {
-      setIsConfirmOpen(false);
-      toast.error(e instanceof ApiError ? e.message : "登録に失敗しました");
-    } finally {
-      setIsRegistering(false);
     }
   };
 
@@ -225,7 +189,7 @@ export function ProductRegisterForm() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="categoryId">
                 カテゴリ <span className="text-destructive">*</span>
               </Label>

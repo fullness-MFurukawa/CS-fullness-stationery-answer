@@ -1,16 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { container } from "@/di/container";
-import { TYPES } from "@/di/types";
-import type { IEmployeeAccountService } from "@/interfaces/service/employeeAccountService";
-import type { Employee } from "@/models/responses/employee";
-import { ApiError } from "@/infrastructure/http/apiError";
+import { useEmployeeAccountRegister } from "@/hooks/admin/employee-accounts/useEmployeeAccountRegister";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -70,16 +65,12 @@ const defaultValues: AccountFormValues = {
  */
 export function EmployeeAccountRegisterForm() {
   const router = useRouter();
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { employees, isLoading, register: registerAccount } =
+    useEmployeeAccountRegister();
+
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [confirmedValues, setConfirmedValues] = useState<AccountFormValues | null>(null);
-
-  const service = useMemo(
-    () => container.get<IEmployeeAccountService>(TYPES.EmployeeAccountService),
-    [],
-  );
 
   const {
     register,
@@ -98,25 +89,6 @@ export function EmployeeAccountRegisterForm() {
   const employeeId = watch("employeeId");
 
   /**
-   * アカウント未登録の社員一覧を取得する
-   */
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await service.getEmployeesWithoutAccount();
-        setEmployees(result);
-      } catch (e) {
-        toast.error(
-          e instanceof ApiError ? e.message : "社員一覧の取得に失敗しました",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, [service]);
-
-  /**
    * 入力値の検証を通過したら確認ダイアログを表示する
    * @param values 検証済みの入力値
    */
@@ -132,33 +104,23 @@ export function EmployeeAccountRegisterForm() {
     if (!confirmedValues) return;
 
     setIsRegistering(true);
-    try {
-      const account = await service.register(confirmedValues);
-      toast.success(`「${account.employeeName}」のアカウントを登録しました`);
+    const result = await registerAccount(confirmedValues);
+    setIsRegistering(false);
 
+    if (result.ok) {
       setIsConfirmOpen(false);
       setConfirmedValues(null);
-
-      // 登録した社員は選択肢から除外する
-      setEmployees((prev) =>
-        prev.filter((e) => e.employeeId !== confirmedValues.employeeId),
-      );
-
-      // フォームを初期状態へ戻す（入力値と検証エラーの両方をクリアする）
       reset(defaultValues);
       clearErrors();
-    } catch (e) {
-      setIsConfirmOpen(false);
-      if (e instanceof ApiError && e.isConflict) {
-        // アカウント名の重複は入力項目のエラーとして表示する
-        setError("accountName", {
-          message: "このアカウント名は既に使用されています",
-        });
-        return;
-      }
-      toast.error(e instanceof ApiError ? e.message : "登録に失敗しました");
-    } finally {
-      setIsRegistering(false);
+      return;
+    }
+
+    setIsConfirmOpen(false);
+    if (result.conflict) {
+      // アカウント名の重複は入力項目のエラーとして表示する
+      setError("accountName", {
+        message: "このアカウント名は既に使用されています",
+      });
     }
   };
 
@@ -194,15 +156,14 @@ export function EmployeeAccountRegisterForm() {
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="employeeId">
                 社員 <span className="text-destructive">*</span>
               </Label>
-               <Select
+              <Select
                 value={employeeId}
                 onValueChange={(value) => {
                   setValue("employeeId", value ?? "");
-                  // 選択したらエラー表示を消す
                   if (value) {
                     clearErrors("employeeId");
                   }

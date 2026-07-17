@@ -1,14 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Search, X } from "lucide-react";
-import { container } from "@/di/container";
-import { TYPES } from "@/di/types";
-import type { IOrderService } from "@/interfaces/service/orderService";
-import type { Order } from "@/models/responses/order";
-import type { OrderStatus } from "@/models/responses/orderStatus";
-import { ApiError } from "@/infrastructure/http/apiError";
+import { useOrderSearch } from "@/hooks/admin/orders/useOrderSearch";
 import { OrderCard } from "./orderCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,58 +26,23 @@ const ALL_STATUSES = "all";
  * 注文ステータスの更新を行う。
  */
 export function OrderSearch() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [statuses, setStatuses] = useState<OrderStatus[]>([]);
+  const { orders, statuses, isLoading, search, updateStatus } = useOrderSearch();
+
   const [orderDate, setOrderDate] = useState("");
   const [customerAccountName, setCustomerAccountName] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(ALL_STATUSES);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const service = useMemo(
-    () => container.get<IOrderService>(TYPES.OrderService),
-    [],
-  );
-
-  /**
-   * 画面の初期表示に必要なデータを取得する
-   */
-  const loadInitial = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const view = await service.getSearchView();
-      setOrders(view.orders);
-      setStatuses(view.statuses);
-    } catch (e) {
-      toast.error(
-        e instanceof ApiError ? e.message : "データの取得に失敗しました",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [service]);
-
-  useEffect(() => {
-    loadInitial();
-  }, [loadInitial]);
 
   /**
    * 検索条件で購入履歴を絞り込む
    */
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const result = await service.search(
-        orderDate || undefined,
-        customerAccountName.trim() || undefined,
+    await search({
+      orderDate: orderDate || undefined,
+      customerAccountName: customerAccountName.trim() || undefined,
+      orderStatusId:
         statusFilter === ALL_STATUSES ? undefined : Number(statusFilter),
-      );
-      setOrders(result);
-    } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "検索に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   /**
@@ -93,37 +52,7 @@ export function OrderSearch() {
     setOrderDate("");
     setCustomerAccountName("");
     setStatusFilter(ALL_STATUSES);
-    setIsLoading(true);
-    try {
-      const result = await service.search();
-      setOrders(result);
-    } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "検索に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * 注文ステータスを更新する
-   * @param order 対象の注文
-   * @param statusId 変更後の注文ステータスID
-   */
-  const handleStatusChange = async (order: Order, statusId: number) => {
-    try {
-      const updated = await service.updateStatus({
-        orderId: order.orderId,
-        orderStatusId: statusId,
-      });
-      setOrders((prev) =>
-        prev.map((o) => (o.orderId === updated.orderId ? updated : o)),
-      );
-      toast.success(`ステータスを「${updated.statusName}」に更新しました`);
-    } catch (e) {
-      toast.error(
-        e instanceof ApiError ? e.message : "ステータスの更新に失敗しました",
-      );
-    }
+    await search();
   };
 
   const hasCondition =
@@ -232,7 +161,7 @@ export function OrderSearch() {
               key={order.orderId}
               order={order}
               statuses={statuses}
-              onStatusChange={handleStatusChange}
+              onStatusChange={updateStatus}
             />
           ))}
         </div>
