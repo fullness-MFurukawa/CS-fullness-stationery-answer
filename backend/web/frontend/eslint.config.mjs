@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // shadcn/ui が生成したコード。
+    // npx shadcn add で導入したものであり、手を入れても再導入で上書きされる。
+    // 自分たちで保守する対象ではないため、静的解析の対象から外す。
+    "components/ui/**",
+    "hooks/use-mobile.ts",
   ]),
 ]);
 
