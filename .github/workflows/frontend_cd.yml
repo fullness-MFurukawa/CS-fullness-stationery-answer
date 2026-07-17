@@ -1,0 +1,98 @@
+name: Frontend CD
+
+on:
+  workflow_run:
+    workflows: ["Frontend CI"]   # frontend_ci.yml の name と一致させる
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:             # 手動実行も残す
+
+# バックエンドのCDと同時に走ってもVM上では別サービスのため干渉しないが、
+# フロントエンドのCDどうしが重なるとrsyncが競合する。
+concurrency:
+  group: frontend-cd
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: backend/web/frontend
+
+jobs:
+  deploy:
+    name: Azure VMへデプロイ
+    runs-on: ubuntu-latest
+    # CIが成功したときのみ実行（手動実行時は無条件で通す）
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    env:
+      DEPLOY_DIR: /var/www/fullness-web
+      SERVICE_NAME: fullness-web
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.jsをセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/web/frontend/package-lock.json
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: ビルド
+        # ビルド時にも API_BASE_URL が要る（next.config.ts が参照するため）。
+        # 本番ではVM内部からバックエンドを呼ぶので 127.0.0.1:5000 を指す。
+        run: npm run build
+        env:
+          API_BASE_URL: http://127.0.0.1:5000
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+      - name: 成果物をまとめる
+        # output: "standalone" の成果物には .next/static と public が含まれない。
+        # CDNへ載せる構成も想定した仕様のため、自分で配置する必要がある。
+        # standalone を土台にして、この2つを所定の位置へ足す。
+        run: |
+          mkdir -p ${{ github.workspace }}/web-publish
+          cp -r .next/standalone/. ${{ github.workspace }}/web-publish/
+          mkdir -p ${{ github.workspace }}/web-publish/.next
+          cp -r .next/static ${{ github.workspace }}/web-publish/.next/static
+          if [ -d public ]; then
+            cp -r public ${{ github.workspace }}/web-publish/public
+          fi
+
+      - name: SSH鍵を準備
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 環境変数ファイルを生成
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "sudo tee /etc/fullness/web.env > /dev/null <<'EOF'
+          NODE_ENV=production
+          PORT=3000
+          HOSTNAME=127.0.0.1
+          API_BASE_URL=http://127.0.0.1:5000
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          AUTH_URL=http://${{ secrets.VM_HOST }}
+          AUTH_TRUST_HOST=true
+          EOF
+          sudo chown root:fullness /etc/fullness/web.env
+          sudo chmod 640 /etc/fullness/web.env"
+
+      - name: 成果物を転送
+        run: rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" ${{ github.workspace }}/web-publish/ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/fullness-web-publish/
+
+      - name: 配置してサービスを起動
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "\
+            sudo rsync -a --delete /tmp/fullness-web-publish/ ${{ env.DEPLOY_DIR }}/ && \
+            sudo chown -R fullness:fullness ${{ env.DEPLOY_DIR }} && \
+            sudo systemctl restart ${{ env.SERVICE_NAME }} && \
+            sleep 8 && \
+            sudo systemctl is-active ${{ env.SERVICE_NAME }}"
