@@ -7,6 +7,12 @@ import type { NextConfig } from "next";
  * これによりCORSとCookieのSameSite制約を回避する。
  */
 const nextConfig: NextConfig = {
+  /**
+   * 実行に必要な依存だけを抽出した成果物を出力する。
+   * node_modules 全体を配布せずに済むため、デプロイが軽くなる。
+   * 出力は .next/standalone に生成され、node server.js で起動する。
+   */
+  output: "standalone",
   async rewrites() {
     return [
       {
