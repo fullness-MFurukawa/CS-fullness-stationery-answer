@@ -69,7 +69,7 @@ public class CustomerRegisterInteractor : ICustomerRegisterUsecase
                 param.MailAddress,
                 param.Username,
                 hashedPassword,
-                DateTime.UtcNow);
+                DateTime.Now);
 
             await _customerRepository.AddAsync(customer);
             return customer;
