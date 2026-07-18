@@ -49,6 +49,7 @@ public sealed class Order : Entity<Guid>
     /// </remarks>
     public IReadOnlyList<OrderDetail> Details { get; }
 
+
     /// <summary>
     /// コンストラクタ
     /// </summary>
@@ -94,7 +95,11 @@ public sealed class Order : Entity<Guid>
         Customer = customer;
         Status = status;
         PaymentMethod = paymentMethod;
-        Details = details;
+        // 受け取ったコレクションをコピーする。
+        // IReadOnlyListは「読み取り専用のビュー」であって「不変のコレクション」ではない。
+        // 元のListへの参照が生きていると、呼び出し側が後からAddしたときに
+        // 注文の明細が変わってしまう。集約の内部は外部から書き換えられてはならない
+        Details = details.ToList();
     }
 
     /// <summary>

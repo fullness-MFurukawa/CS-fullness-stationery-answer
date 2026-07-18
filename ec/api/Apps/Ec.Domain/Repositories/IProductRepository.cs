@@ -24,21 +24,25 @@ public interface IProductRepository
     Task<IReadOnlyList<Product>> FindByCategoryAsync(Guid categoryId);
 
     /// <summary>
-    /// 識別IDを指定して商品を取得
+    /// 識別IDを指定して有効な商品を取得(論理削除を除く)
     /// </summary>
     /// <param name="id">商品識別ID(uuid)</param>
-    /// <returns>該当する商品。存在しない場合はnull</returns>
+    /// <returns>該当する商品。存在しない、または論理削除されている場合はnull</returns>
     Task<Product?> FindByIdAsync(Guid id);
 
     /// <summary>
-    /// 識別IDを指定して商品を取得し、在庫レコードを悲観的ロックする(UC005)
+    /// 識別IDを指定して有効な商品を取得し、在庫レコードを悲観的ロックする(UC005)
     /// </summary>
     /// <param name="ids">商品識別ID(uuid)の一覧</param>
-    /// <returns>該当する商品の一覧。存在しない識別IDは結果に含まれない</returns>
+    /// <returns>該当する有効な商品の一覧。存在しない・論理削除された識別IDは結果に含まれない</returns>
     /// <remarks>
     /// 購入確定時、在庫を減らす前に対象の在庫レコードをロックする。
     /// ロックしない場合、二人の顧客が同時に最後の1個を購入すると、
     /// 双方が「在庫あり」と判定して在庫が負数になりうる。
+    ///
+    /// 論理削除された商品は結果に含めない。
+    /// カートに入れた後に管理者が削除した商品は、ここで取得できず、
+    /// 呼び出し側（ユースケース）が「購入できない」と判定できる。
     ///
     /// このメソッドはトランザクションの内側で呼び出さなければならない。
     /// ロックはトランザクションの終了まで保持される。
