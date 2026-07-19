@@ -38,6 +38,7 @@ public class CategoriesController : ControllerBase
     /// カテゴリ別商品検索画面（FP006）の絞り込みの選択肢として使用する。
     /// 未ログインでも利用できる。該当が0件の場合は空の配列を返す。
     /// </remarks>
+     [EndpointSummary("商品カテゴリ一覧の取得")]
     [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), StatusCodes.Status200OK)]

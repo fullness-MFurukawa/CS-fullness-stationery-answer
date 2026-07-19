@@ -54,6 +54,7 @@ public class OrdersController : EcControllerBase
     /// 在庫を引き当てて注文を登録する。在庫不足の場合は400を返す。
     /// 顧客は認証済みのトークンから特定する。
     /// </remarks>
+    [EndpointSummary("購入確定")]
     [HttpPost]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -71,6 +72,7 @@ public class OrdersController : EcControllerBase
     /// UC007:購入履歴の一覧を取得する
     /// </summary>
     /// <returns>認証済みの顧客の注文一覧（新しい順）</returns>
+    [EndpointSummary("購入履歴一覧の取得")]
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -91,6 +93,7 @@ public class OrdersController : EcControllerBase
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [EndpointSummary("購入履歴詳細の取得")]
     public async Task<ActionResult<OrderResponse>> GetAsync(Guid orderId)
     {
         var order = await _orderDetailUsecase.ExecuteAsync(

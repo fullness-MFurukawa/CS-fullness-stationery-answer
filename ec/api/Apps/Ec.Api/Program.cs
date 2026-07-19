@@ -68,8 +68,15 @@ app.UseMiddleware<AppExceptionMiddleware>();
 
 // OpenAPIのJSONドキュメントと、それを閲覧するScalarのUIを公開する。
 // /openapi/v1.json にドキュメント、/scalar/v1 にUIが出る
+// OpenAPIのJSONドキュメントと、それを閲覧するScalarのUIを公開する。
+// UIは /ec/docs、JSONは /openapi/v1.json に出る
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapScalarApiReference("/ec/docs", options =>
+{
+    options.WithTitle("Fullness Stationery EC API")
+    .WithTheme(ScalarTheme.BluePlanet)
+    .WithClassicLayout();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

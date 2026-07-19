@@ -35,6 +35,7 @@ public class PaymentMethodsController : ControllerBase
     /// </summary>
     /// <returns>支払い方法の一覧</returns>
     /// <remarks>購入確認画面(FP009)のプルダウンに表示する。</remarks>
+    [EndpointSummary("支払い方法一覧の取得")]
     [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<PaymentMethodResponse>), StatusCodes.Status200OK)]

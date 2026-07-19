@@ -44,6 +44,7 @@ public class AuthController : ControllerBase
     /// アクセストークンはレスポンスボディで返す。
     /// メールアドレスの誤りとパスワードの誤りは区別せず、いずれも401とする。
     /// </remarks>
+    [EndpointSummary("顧客ログイン")]
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]

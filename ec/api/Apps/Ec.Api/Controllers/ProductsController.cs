@@ -41,6 +41,7 @@ public class ProductsController : ControllerBase
     /// <param name="categoryId">商品カテゴリ識別ID(uuid)。指定しない場合は全件取得する</param>
     /// <returns>論理削除を除いた商品の一覧</returns>
     /// <remarks>未ログインでも利用できる。該当0件は正常系として空配列を返す。</remarks>
+    [EndpointSummary("商品検索")]
     [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ProductResponse>), StatusCodes.Status200OK)]
@@ -58,6 +59,7 @@ public class ProductsController : ControllerBase
     /// <param name="productId">商品識別ID(uuid)</param>
     /// <returns>該当する商品</returns>
     /// <remarks>未ログインでも利用できる。存在しない・販売終了の場合は404。</remarks>
+    [EndpointSummary("商品詳細の取得")]
     [AllowAnonymous]
     [HttpGet("{productId:guid}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]

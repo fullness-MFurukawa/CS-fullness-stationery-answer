@@ -12,7 +12,7 @@ namespace Ec.Api.Controllers;
 [ApiController]
 [Route("api/ec/customers")]
 [Produces("application/json")]
-[Tags("顧客アカウント登録")]
+[Tags("顧客")]
 public class CustomersController : ControllerBase
 {
     private readonly ICustomerRegisterUsecase _customerRegisterUsecase;
@@ -44,6 +44,7 @@ public class CustomersController : ControllerBase
     /// 未ログインでも利用できる。
     /// メールアドレスまたはアカウント名が既に登録されている場合は409を返す。
     /// </remarks>
+    [EndpointSummary("顧客アカウント登録")]
     [AllowAnonymous]
     [HttpPost]
     [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status201Created)]

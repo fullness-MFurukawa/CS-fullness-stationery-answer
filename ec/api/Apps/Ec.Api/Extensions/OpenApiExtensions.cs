@@ -22,6 +22,33 @@ public static class OpenApiExtensions
         {
             options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
+                document.Info.Title = "Fullness Stationery EC API";
+                document.Info.Version = "v1";
+                document.Info.Description =
+                    """
+                    文具・雑貨販売ECサイト **Fullness Stationery** の顧客向けAPIです。🛍️
+
+                    ## 📖 概要
+
+                    このAPIは、顧客がECサイトを利用するための機能を提供します。
+                    ユースケース UC001〜UC007 に対応します。
+
+                    ## 🔑 認証
+
+                    一部のAPIはログインが必要です。`POST /api/ec/auth/login` で
+                    アクセストークンを取得し、画面右上の **Authentication** に設定してください。
+
+                    | 認証 | エンドポイント |
+                    | --- | --- |
+                    | 🟢 不要 | 顧客登録・ログイン・商品検索・商品詳細・カテゴリ一覧・支払い方法一覧 |
+                    | 🔒 必要 | 購入確定・購入履歴 |
+
+                    ## ⚠️ 注意事項
+
+                    - 🛒 カートはフロントエンドで保持し、購入確定（UC005）で初めて注文になります。
+                    - 📦 在庫は購入確定時に悲観的ロックを行い、同時購入による在庫の不整合を防ぎます。
+                    """;
+
                 // Bearerトークン（JWT）のセキュリティスキームを定義する
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
