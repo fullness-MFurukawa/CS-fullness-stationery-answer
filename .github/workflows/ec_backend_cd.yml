@@ -1,0 +1,70 @@
+name: EC Backend CD
+
+on:
+  workflow_run:
+    workflows: ["EC Backend CI"]   # ec_backend_ci.yml の name と一致させる
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:               # 手動実行も残す
+
+jobs:
+  deploy:
+    name: Azure VMへデプロイ
+    runs-on: ubuntu-latest
+    # CIが成功したときのみ実行（手動実行時は無条件で通す）
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    env:
+      DEPLOY_DIR: /var/www/fullness-ec-api
+      SERVICE_NAME: fullness-ec-api
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: .NET SDKをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ec/api/global.json
+
+      - name: 発行
+        working-directory: ec/api
+        run: dotnet publish Apps/Ec.Api/Ec.Api.csproj --configuration Release --output ${{ github.workspace }}/publish
+
+      - name: SSH鍵を準備
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 環境変数ファイルを生成
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "sudo tee /etc/fullness/ec-api.env > /dev/null <<'EOF'
+          ASPNETCORE_ENVIRONMENT=Production
+          ASPNETCORE_URLS=http://127.0.0.1:5100
+          ConnectionStrings__FullnessEc=${{ secrets.DB_CONNECTION_STRING }}
+          CustomerJwt__SigningKey=${{ secrets.CUSTOMER_JWT_SIGNING_KEY }}
+          CustomerJwt__Issuer=http://${{ secrets.VM_HOST }}
+          CustomerJwt__Audience=http://${{ secrets.VM_HOST }}
+          EOF
+          sudo chown root:fullness /etc/fullness/ec-api.env
+          sudo chmod 640 /etc/fullness/ec-api.env"
+
+      - name: 成果物を転送
+        run: rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" ${{ github.workspace }}/publish/ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/fullness-ec-publish/
+
+      - name: 成果物を配置
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "\
+            sudo rsync -a --delete /tmp/fullness-ec-publish/ ${{ env.DEPLOY_DIR }}/ && \
+            sudo chown -R fullness:fullness ${{ env.DEPLOY_DIR }} && \
+            sudo chmod +x ${{ env.DEPLOY_DIR }}/Ec.Api"
+
+      - name: サービスを再起動
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "\
+            sudo systemctl restart ${{ env.SERVICE_NAME }} && \
+            sleep 8 && \
+            sudo systemctl is-active ${{ env.SERVICE_NAME }}"
