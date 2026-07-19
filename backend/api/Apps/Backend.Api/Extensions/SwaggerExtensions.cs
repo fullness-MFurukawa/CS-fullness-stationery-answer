@@ -68,6 +68,9 @@ public static class SwaggerExtensions
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "Fullness Stationery API v1");
             options.DocumentTitle = "Fullness Stationery データ管理サービス API";
+            // UIを /admin/docs に出す（EC側の /ec/docs と規則を揃える）。
+            // RoutePrefix は末尾スラッシュなしで指定する
+            options.RoutePrefix = "admin/docs";
         });
 
         return app;
