@@ -14,13 +14,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApi(this IServiceCollection services)
     {
         // リクエスト → ユースケースの入力値
-        //services.AddSingleton<CustomerRegisterRequestAdapter>();
+        services.AddSingleton<CustomerRegisterRequestAdapter>();
         services.AddSingleton<LoginRequestAdapter>();
         //services.AddSingleton<OrderCreateRequestAdapter>();
 
         // ドメインオブジェクト → レスポンス
         services.AddSingleton<LoginResponseAdapter>();
-        //services.AddSingleton<CustomerResponseAdapter>();
+        services.AddSingleton<CustomerResponseAdapter>();
         //services.AddSingleton<CategoryResponseAdapter>();
         //services.AddSingleton<ProductResponseAdapter>();
         //services.AddSingleton<PaymentMethodResponseAdapter>();
