@@ -122,7 +122,7 @@ public class OrderCreateInteractor : IOrderCreateUsecase
                 orderedStatus,
                 paymentMethod,
                 details,
-                DateTime.UtcNow);
+                DateTime.Now);
 
             await _orderRepository.AddAsync(order);
             return order;

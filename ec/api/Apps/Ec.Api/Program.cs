@@ -54,8 +54,9 @@ builder.Services.AddControllers();
 builder.Services.AddApiBehavior();
 builder.Services.AddProblemDetails();
 
-// 組み込みのOpenAPIドキュメント生成（.NET 9以降）。UIは含まないためScalarで表示する
-builder.Services.AddOpenApi();
+// 組み込みのOpenAPIドキュメント生成（.NET 9以降）。UIは含まないためScalarで表示する。
+// Bearer認証のセキュリティ定義を含める
+builder.Services.AddEcOpenApi();
 
 var app = builder.Build();
 

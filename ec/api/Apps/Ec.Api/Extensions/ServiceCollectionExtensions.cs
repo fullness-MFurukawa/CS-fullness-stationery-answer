@@ -16,16 +16,16 @@ public static class ServiceCollectionExtensions
         // リクエスト → ユースケースの入力値
         services.AddSingleton<CustomerRegisterRequestAdapter>();
         services.AddSingleton<LoginRequestAdapter>();
-        //services.AddSingleton<OrderCreateRequestAdapter>();
+        services.AddSingleton<OrderCreateRequestAdapter>();
 
         // ドメインオブジェクト → レスポンス
         services.AddSingleton<LoginResponseAdapter>();
         services.AddSingleton<CustomerResponseAdapter>();
-        //services.AddSingleton<CategoryResponseAdapter>();
-        //services.AddSingleton<ProductResponseAdapter>();
-        //services.AddSingleton<PaymentMethodResponseAdapter>();
-        //services.AddSingleton<OrderDetailResponseAdapter>();
-        //services.AddSingleton<OrderResponseAdapter>();
+        services.AddSingleton<CategoryResponseAdapter>();
+        services.AddSingleton<ProductResponseAdapter>();
+        services.AddSingleton<PaymentMethodResponseAdapter>();
+        services.AddSingleton<OrderDetailResponseAdapter>();
+        services.AddSingleton<OrderResponseAdapter>();
 
         return services;
     }
