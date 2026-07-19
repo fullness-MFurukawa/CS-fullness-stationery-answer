@@ -6,11 +6,13 @@ on:
     paths:
       - "ec/api/**"
       - ".github/workflows/ec_backend_ci.yml"
+      - ".github/workflows/ec_backend_cd.yml"
   pull_request:
     branches: [ main ]
     paths:
       - "ec/api/**"
       - ".github/workflows/ec_backend_ci.yml"
+      - ".github/workflows/ec_backend_cd.yml"
 
 jobs:
   build-and-test:
