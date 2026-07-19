@@ -50,7 +50,7 @@ public class ProductsControllerTests
         Assert.IsNotNull(ok);
         var response = ok!.Value as IReadOnlyList<ProductResponse>;
         Assert.IsNotNull(response);
-        Assert.AreEqual(2, response!.Count);
+        Assert.HasCount(2, response);
     }
 
     [TestMethod(DisplayName = "カテゴリIDを指定するとユースケースへ渡される")]
