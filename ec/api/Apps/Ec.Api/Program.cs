@@ -1,41 +1,81 @@
+using System.Text;
+using Ec.Api.Extensions;
+using Ec.Api.Middleware;
+using Ec.Application.Extensions;
+using Ec.Infrastructure.Extensions;
+using Ec.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// ------------------------------------------------------------
+// 各層のサービスをDIコンテナへ登録
+// ------------------------------------------------------------
+builder.Services.AddApi();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// ------------------------------------------------------------
+// 認証（JWTをAuthorizationヘッダーのBearerトークンから読み取る）
+// ------------------------------------------------------------
+// 管理サービス側とは別の署名鍵・発行者・対象者を用いる（CustomerJwtセクション）。
+// これにより、顧客のトークンで管理サービスのAPIを呼び出せないようにする。
+var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
+var signingKey = jwtSection["SigningKey"]
+    ?? throw new InvalidOperationException($"{JwtOptions.SectionName}:SigningKey が設定されていません。");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // "sub" などのクレーム名をそのまま扱う（既定ではURI形式へ変換される）
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = "name",
+            RoleClaimType = "role"
+        };
+        // トークンは Authorization: Bearer ヘッダーで受け取る。
+        // フロントエンドは同一オリジンで動くため、CookieもCORSも不要。
+    });
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
+builder.Services.AddApiBehavior();
+builder.Services.AddProblemDetails();
+
+// 組み込みのOpenAPIドキュメント生成（.NET 9以降）。UIは含まないためScalarで表示する
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// ------------------------------------------------------------
+// ミドルウェアパイプライン
+// ------------------------------------------------------------
+// 例外処理は最も外側に配置し、後続のすべての例外を捕捉する
+app.UseMiddleware<AppExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+// OpenAPIのJSONドキュメントと、それを閲覧するScalarのUIを公開する。
+// /openapi/v1.json にドキュメント、/scalar/v1 にUIが出る
+app.MapOpenApi();
+app.MapScalarApiReference();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+/// <summary>
+/// 統合テストから参照するためのエントリポイントの公開
+/// </summary>
+public partial class Program;

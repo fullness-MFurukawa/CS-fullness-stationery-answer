@@ -16,7 +16,7 @@ public class PaymentMethodRepositoryTests : RepositoryTestBase
 
         var methods = await repository.FindAllAsync();
 
-        Assert.IsTrue(methods.Count > 0);
+        Assert.IsNotEmpty(methods);
         // UC005時点では「現金」が登録されている
         Assert.IsTrue(methods.Any(m => m.Name == "現金"));
     }

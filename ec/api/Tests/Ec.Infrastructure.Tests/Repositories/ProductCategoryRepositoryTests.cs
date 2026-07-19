@@ -16,7 +16,7 @@ public class ProductCategoryRepositoryTests : RepositoryTestBase
 
         var categories = await repository.FindAllAsync();
 
-        Assert.IsTrue(categories.Count > 0);
+        Assert.IsNotEmpty(categories);
         // 文房具・雑貨などサンプルデータのカテゴリが含まれる
         Assert.IsTrue(categories.Any(c => c.Name == "文房具"));
     }
