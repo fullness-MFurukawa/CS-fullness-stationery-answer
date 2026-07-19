@@ -8,15 +8,13 @@ on:
 #    branches: [ main ]
 #  schedule:
 #    - cron: '0 3 * * 1'   # 毎週月曜 03:00 UTC に定期実行
-
 jobs:
   analyze:
     name: CodeQL解析
     runs-on: ubuntu-latest
     permissions:
-      security-events: write   # 解析結果をSecurityタブへアップロードするためのŌ権限
+      security-events: write   # 解析結果をSecurityタブへアップロードするための権限
       contents: read
-
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
@@ -32,8 +30,15 @@ jobs:
           languages: csharp
           build-mode: manual
 
-      - name: ビルド
+      # 管理サービス側とEC側の両方をビルドする。
+      # build-mode: manual では、解析前にすべての対象をビルドする必要がある。
+      # ビルドされなかったコードは解析対象に含まれない。
+      - name: ビルド（管理サービス側）
         working-directory: backend/api
+        run: dotnet build --configuration Release
+
+      - name: ビルド（EC側）
+        working-directory: ec/api
         run: dotnet build --configuration Release
 
       - name: 解析を実行
