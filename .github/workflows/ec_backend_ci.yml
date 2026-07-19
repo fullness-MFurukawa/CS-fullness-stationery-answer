@@ -1,0 +1,87 @@
+name: EC Backend CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "ec/api/**"
+      - ".github/workflows/ec_backend_ci.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "ec/api/**"
+      - ".github/workflows/ec_backend_ci.yml"
+
+jobs:
+  build-and-test:
+    name: ビルドとテスト
+    runs-on: ubuntu-latest
+    # リポジトリ統合テスト（実DBに接続するテスト）で使用するPostgreSQL。
+    # ジョブの実行中だけ起動する使い捨てのコンテナで、テスト終了後に破棄される。
+    services:
+      postgres:
+        # PostgreSQL 17 の公式イメージを使用する
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fullness_ec
+        ports:
+          - 5432:5432
+        # DBが接続を受け付けられる状態になるまでヘルスチェックで待機する
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # インフラストラクチャ層のテスト（appsettings.Test.json）の接続文字列を上書きする
+      ConnectionStrings__FullnessEc: "Host=localhost;Port=5432;Database=fullness_ec;Username=postgres;Password=postgres"
+      # 将来 WebApplicationFactory<Program> を使う統合テストで必要になる。
+      # EC側は顧客用の鍵（CustomerJwt）を使う
+      CustomerJwt__SigningKey: ${{ secrets.CUSTOMER_JWT_SIGNING_KEY }}
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: .NET SDKをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ec/api/global.json
+
+      - name: スキーマとサンプルデータを投入
+        working-directory: ec/api
+        # データベースは POSTGRES_DB により作成済みのため、データベース作成は実行しない
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d fullness_ec -v ON_ERROR_STOP=1 -f db/02_create_tables.sql
+          psql -h localhost -U postgres -d fullness_ec -v ON_ERROR_STOP=1 -f db/03_insert_sample_data.sql
+
+      - name: 依存パッケージを復元
+        working-directory: ec/api
+        run: dotnet restore
+
+      - name: ビルド（警告をエラーとして扱う）
+        working-directory: ec/api
+        run: dotnet build --configuration Release --no-restore -warnaserror
+
+      - name: 書式チェック
+        working-directory: ec/api
+        run: dotnet format --verify-no-changes --severity warn --no-restore
+
+      - name: ドメイン層のテスト
+        working-directory: ec/api
+        run: dotnet test Tests/Ec.Domain.Tests/Ec.Domain.Tests.csproj --configuration Release --no-build
+
+      - name: アプリケーション層のテスト
+        working-directory: ec/api
+        run: dotnet test Tests/Ec.Application.Tests/Ec.Application.Tests.csproj --configuration Release --no-build
+
+      - name: インフラストラクチャ層のテスト
+        working-directory: ec/api
+        run: dotnet test Tests/Ec.Infrastructure.Tests/Ec.Infrastructure.Tests.csproj --configuration Release --no-build
+
+      - name: API層のテスト
+        working-directory: ec/api
+        run: dotnet test Tests/Ec.Api.Tests/Ec.Api.Tests.csproj --configuration Release --no-build
